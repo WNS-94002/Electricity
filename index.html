@@ -493,6 +493,123 @@
     </div>
   </div>
 
+  <!-- Dynamic Section: shown when year selected -->
+  <div id="yearlySection" style="display:none;margin-bottom:20px;">
+    <!-- Electricity Saving Card + Production Donut -->
+    <div class="two-col" style="margin-bottom:20px;">
+      <!-- Saving Card -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">💰 Electricity Saving Analysis</span>
+        </div>
+        <div style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;">
+            <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+              <div style="font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'Oswald',sans-serif;margin-bottom:6px;">ACTUAL</div>
+              <div id="sv-actual" style="font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--accent);">—</div>
+              <div style="font-size:10px;color:var(--muted);">kWh</div>
+            </div>
+            <div style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+              <div style="font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'Oswald',sans-serif;margin-bottom:6px;">PLAN</div>
+              <div id="sv-plan" style="font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--accent2);">—</div>
+              <div style="font-size:10px;color:var(--muted);">kWh</div>
+            </div>
+            <div id="sv-card" style="background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center;">
+              <div style="font-size:11px;color:var(--muted);letter-spacing:1px;font-family:'Oswald',sans-serif;margin-bottom:6px;">SAVING</div>
+              <div id="sv-saving" style="font-family:'Share Tech Mono',monospace;font-size:22px;">—</div>
+              <div id="sv-pct" style="font-size:12px;margin-top:4px;">—</div>
+            </div>
+          </div>
+          <div style="height:6px;background:var(--border);border-radius:3px;overflow:hidden;">
+            <div id="sv-bar" style="height:100%;border-radius:3px;transition:width 0.6s ease;width:0%;"></div>
+          </div>
+          <div id="sv-label" style="font-size:11px;color:var(--muted);margin-top:6px;text-align:center;"></div>
+        </div>
+      </div>
+      <!-- Production Donut -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">🏭 Production: Actual vs Plan</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:24px;padding:20px;">
+          <div style="position:relative;width:160px;height:160px;flex-shrink:0;">
+            <canvas id="chartProdDonut"></canvas>
+            <div id="donut-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
+              <div id="donut-pct" style="font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--accent3);"></div>
+              <div style="font-size:10px;color:var(--muted);">Achievement</div>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">ACTUAL</div>
+              <div id="donut-actual" style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--accent3);"></div>
+              <div style="font-size:10px;color:var(--muted);">BCM</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">PLAN</div>
+              <div id="donut-plan" style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--accent2);"></div>
+              <div style="font-size:10px;color:var(--muted);">BCM</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">DIFF</div>
+              <div id="donut-diff" style="font-family:'Share Tech Mono',monospace;font-size:18px;"></div>
+              <div style="font-size:10px;color:var(--muted);">BCM</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Avg Line Length & Lift comparison cards -->
+    <div class="two-col" style="margin-bottom:0;">
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title" style="color:#06b6d4;">📏 Avg Line Length — Actual vs Plan</span></div>
+        <div style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div style="background:var(--panel2);border:1px solid rgba(6,182,212,0.3);border-radius:8px;padding:14px;text-align:center;">
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;margin-bottom:4px;">ACTUAL AVG</div>
+              <div id="ll-actual" style="font-family:'Share Tech Mono',monospace;font-size:24px;color:#06b6d4;">—</div>
+            </div>
+            <div style="background:var(--panel2);border:1px solid rgba(6,182,212,0.2);border-radius:8px;padding:14px;text-align:center;">
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;margin-bottom:4px;">PLAN AVG</div>
+              <div id="ll-plan" style="font-family:'Share Tech Mono',monospace;font-size:24px;color:var(--accent2);">—</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:12px;color:var(--muted);">Diff (Actual − Plan)</div>
+            <div id="ll-diff" style="font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:600;"></div>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px;">
+            <div id="ll-bar" style="height:100%;border-radius:2px;background:#06b6d4;transition:width 0.6s ease;width:0%;"></div>
+          </div>
+          <div id="ll-bar-label" style="font-size:10px;color:var(--muted);margin-top:4px;text-align:right;"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-header"><span class="panel-title" style="color:#f43f5e;">🏋️ Avg Line Lift — Actual vs Plan</span></div>
+        <div style="padding:20px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div style="background:var(--panel2);border:1px solid rgba(244,63,94,0.3);border-radius:8px;padding:14px;text-align:center;">
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;margin-bottom:4px;">ACTUAL AVG</div>
+              <div id="lf-actual" style="font-family:'Share Tech Mono',monospace;font-size:24px;color:#f43f5e;">—</div>
+            </div>
+            <div style="background:var(--panel2);border:1px solid rgba(244,63,94,0.2);border-radius:8px;padding:14px;text-align:center;">
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;margin-bottom:4px;">PLAN AVG</div>
+              <div id="lf-plan" style="font-family:'Share Tech Mono',monospace;font-size:24px;color:var(--accent2);">—</div>
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div style="font-size:12px;color:var(--muted);">Diff (Actual − Plan)</div>
+            <div id="lf-diff" style="font-family:'Share Tech Mono',monospace;font-size:16px;font-weight:600;"></div>
+          </div>
+          <div style="height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-top:8px;">
+            <div id="lf-bar" style="height:100%;border-radius:2px;background:#f43f5e;transition:width 0.6s ease;width:0%;"></div>
+          </div>
+          <div id="lf-bar-label" style="font-size:10px;color:var(--muted);margin-top:4px;text-align:right;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Charts -->
   <div class="two-col" style="margin-bottom:20px;">
     <div class="panel">
@@ -791,6 +908,9 @@ function updateCharts(data) {
     elecActual = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.actualElec, 0));
     elecPlan = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.planElec, 0));
   }
+  // Accumulated lines
+  const elecAccActual = elecActual.reduce((acc, v) => { acc.push((acc.length ? acc[acc.length-1] : 0) + v); return acc; }, []);
+  const elecAccPlan   = elecPlan.reduce((acc, v) => { acc.push((acc.length ? acc[acc.length-1] : 0) + v); return acc; }, []);
 
   if (chartElecInst) chartElecInst.destroy();
   chartElecInst = new Chart(document.getElementById('chartElec'), {
@@ -798,11 +918,27 @@ function updateCharts(data) {
     data: {
       labels: elecLabels,
       datasets: [
-        { label: 'Actual (kWh)', data: elecActual, backgroundColor: 'rgba(0,212,255,0.6)', borderColor: 'rgba(0,212,255,1)', borderWidth: 1, borderRadius: 3 },
-        { label: 'Plan (kWh)', data: elecPlan, backgroundColor: 'rgba(245,158,11,0.4)', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1, type: 'line', tension: 0.4, fill: false, pointRadius: 2 }
+        { label: 'Actual (kWh)', data: elecActual, backgroundColor: 'rgba(0,212,255,0.55)', borderColor: 'rgba(0,212,255,1)', borderWidth: 1, borderRadius: 3, order: 2 },
+        { label: 'Plan (kWh)', data: elecPlan, backgroundColor: 'rgba(245,158,11,0.35)', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1, borderRadius: 3, order: 2 },
+        { label: 'Acc. Actual', data: elecAccActual, type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(0,255,180,0.9)', backgroundColor: 'rgba(0,255,180,0)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 2.5, pointBackgroundColor: '#00ffb4', borderDash: [0], order: 1 },
+        { label: 'Acc. Plan',   data: elecAccPlan,   type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(255,200,0,0.7)',  backgroundColor: 'rgba(255,200,0,0)',  borderWidth: 1.5, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#ffc800', borderDash: [5,4], order: 1 }
       ]
     },
-    options: chartOptions('kWh')
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { labels: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 }, boxWidth: 12, padding: 10 } },
+        tooltip: { backgroundColor: '#1a2235', titleColor: '#00d4ff', bodyColor: '#e2e8f0', borderColor: '#1e3a5f', borderWidth: 1,
+          callbacks: { label: ctx => { const v = ctx.parsed.y; return ` ${ctx.dataset.label}: ${v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':v.toLocaleString()}`; } }
+        }
+      },
+      scales: {
+        x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(30,58,95,0.4)' } },
+        y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v }, grid: { color: 'rgba(30,58,95,0.4)' }, title: { display: true, text: 'kWh', color: '#64748b', font: { size: 10 } } },
+        yAcc: { position: 'right', ticks: { color: '#00ffb4', font: { size: 10 }, callback: v => v>=1e6?(v/1e6).toFixed(1)+'M':v>=1e3?(v/1e3).toFixed(0)+'K':v }, grid: { drawOnChartArea: false }, title: { display: true, text: 'Acc. kWh', color: '#00ffb4', font: { size: 10 } } }
+      }
+    }
   });
 
   // PRODUCTION + PRODUCTIVITY CHART
@@ -1138,6 +1274,103 @@ function updateAll() {
   updateKPIs(data);
   updateCharts(data);
   updateTable(data);
+  updateYearlySection(data);
+}
+
+let chartProdDonutInst = null;
+
+function updateYearlySection(data) {
+  const sec = document.getElementById('yearlySection');
+  const isYear = selectedYear !== 'ALL';
+  sec.style.display = isYear ? 'block' : 'none';
+  if (!isYear) return;
+
+  const totalAE  = data.reduce((s,d)=>s+d.actualElec,0);
+  const totalPE  = data.reduce((s,d)=>s+d.planElec,0);
+  const saving   = totalPE - totalAE;
+  const savePct  = totalPE > 0 ? (saving/totalPE*100) : 0;
+  const isSaving = saving >= 0;
+
+  document.getElementById('sv-actual').textContent  = fmt(totalAE/1e6,3)+'M';
+  document.getElementById('sv-plan').textContent    = fmt(totalPE/1e6,3)+'M';
+  document.getElementById('sv-saving').textContent  = (isSaving?'+':'')+fmt(saving/1e6,3)+'M';
+  document.getElementById('sv-saving').style.color  = isSaving ? '#10b981' : '#ef4444';
+  document.getElementById('sv-pct').textContent     = (isSaving?'🟢 ประหยัดได้ ':'🔴 ใช้เกิน ')+Math.abs(savePct).toFixed(1)+'%';
+  document.getElementById('sv-pct').style.color     = isSaving ? '#10b981' : '#ef4444';
+  document.getElementById('sv-card').style.borderColor = isSaving ? 'rgba(16,185,129,0.5)' : 'rgba(239,68,68,0.5)';
+  const barW = Math.min(Math.abs(savePct), 100);
+  document.getElementById('sv-bar').style.width     = barW+'%';
+  document.getElementById('sv-bar').style.background= isSaving ? '#10b981' : '#ef4444';
+  document.getElementById('sv-label').textContent   = `Actual ${fmt(totalAE/1e6,2)}M kWh  /  Plan ${fmt(totalPE/1e6,2)}M kWh`;
+
+  // Production donut
+  const totalAP  = data.reduce((s,d)=>s+d.actualProd,0);
+  const totalPP  = data.reduce((s,d)=>s+d.planProd,0);
+  const diff     = totalAP - totalPP;
+  const achPct   = totalPP > 0 ? (totalAP/totalPP*100) : 0;
+  const rem      = Math.max(0, totalPP - totalAP);
+  const over     = Math.max(0, totalAP - totalPP);
+
+  document.getElementById('donut-actual').textContent = fmt(totalAP,3);
+  document.getElementById('donut-plan').textContent   = fmt(totalPP,3);
+  document.getElementById('donut-diff').textContent   = (diff>=0?'+':'')+fmt(diff,3);
+  document.getElementById('donut-diff').style.color   = diff>=0 ? '#10b981' : '#ef4444';
+  document.getElementById('donut-pct').textContent    = achPct.toFixed(1)+'%';
+  document.getElementById('donut-pct').style.color    = achPct>=100 ? '#10b981' : '#f59e0b';
+
+  if (chartProdDonutInst) chartProdDonutInst.destroy();
+  chartProdDonutInst = new Chart(document.getElementById('chartProdDonut'), {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: over > 0 ? [totalPP, over] : [totalAP, rem],
+        backgroundColor: over > 0
+          ? ['rgba(16,185,129,0.8)', 'rgba(16,185,129,0.25)']
+          : ['rgba(16,185,129,0.8)', 'rgba(30,58,95,0.6)'],
+        borderColor: over > 0
+          ? ['rgba(16,185,129,1)', 'rgba(16,185,129,0.4)']
+          : ['rgba(16,185,129,1)', 'rgba(30,58,95,1)'],
+        borderWidth: 2,
+        hoverOffset: 4
+      }]
+    },
+    options: {
+      responsive: false,
+      cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { animateRotate: true, duration: 700 }
+    }
+  });
+
+  // Avg Line Length cards
+  const lenRows = data.filter(d=>d.actualLineLen>0);
+  const planLenRows = data.filter(d=>d.planLineLen>0);
+  const avgAL = lenRows.length ? lenRows.reduce((s,d)=>s+d.actualLineLen,0)/lenRows.length : 0;
+  const avgPL = planLenRows.length ? planLenRows.reduce((s,d)=>s+d.planLineLen,0)/planLenRows.length : 0;
+  const diffL = avgAL - avgPL;
+  document.getElementById('ll-actual').textContent = fmt(avgAL,2);
+  document.getElementById('ll-plan').textContent   = fmt(avgPL,2);
+  document.getElementById('ll-diff').textContent   = (diffL>=0?'+':'')+fmt(diffL,2);
+  document.getElementById('ll-diff').style.color   = diffL>=0 ? '#10b981' : '#ef4444';
+  const llPct = avgPL>0 ? Math.min(avgAL/avgPL*100,100) : 0;
+  document.getElementById('ll-bar').style.width    = llPct+'%';
+  document.getElementById('ll-bar').style.background = diffL>=0 ? '#10b981' : '#ef4444';
+  document.getElementById('ll-bar-label').textContent= `Actual เทียบ Plan: ${llPct.toFixed(1)}%`;
+
+  // Avg Line Lift cards
+  const liftRows = data.filter(d=>d.actualLineLift>0);
+  const planLiftRows = data.filter(d=>d.planLineLift>0);
+  const avgAF = liftRows.length ? liftRows.reduce((s,d)=>s+d.actualLineLift,0)/liftRows.length : 0;
+  const avgPF = planLiftRows.length ? planLiftRows.reduce((s,d)=>s+d.planLineLift,0)/planLiftRows.length : 0;
+  const diffF = avgAF - avgPF;
+  document.getElementById('lf-actual').textContent = fmt(avgAF,2);
+  document.getElementById('lf-plan').textContent   = fmt(avgPF,2);
+  document.getElementById('lf-diff').textContent   = (diffF>=0?'+':'')+fmt(diffF,2);
+  document.getElementById('lf-diff').style.color   = diffF>=0 ? '#10b981' : '#ef4444';
+  const lfPct = avgPF>0 ? Math.min(avgAF/avgPF*100,100) : 0;
+  document.getElementById('lf-bar').style.width    = lfPct+'%';
+  document.getElementById('lf-bar').style.background = diffF>=0 ? '#10b981' : '#ef4444';
+  document.getElementById('lf-bar-label').textContent= `Actual เทียบ Plan: ${lfPct.toFixed(1)}%`;
 }
 
 loadData();

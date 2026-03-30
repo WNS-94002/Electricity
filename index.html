@@ -429,72 +429,12 @@
     <div class="year-pills" id="yearPills"></div>
   </div>
 
-  <!-- KPI Cards -->
-  <div class="kpi-grid" id="kpiGrid">
-    <div class="kpi-card blue">
-      <div class="kpi-icon">⚡</div>
-      <div class="kpi-label">Actual Electricity</div>
-      <div class="kpi-value" id="kpi-actual-elec">—</div>
-      <div class="kpi-unit">kWh (รวม)</div>
+  <!-- Dynamic Section: shown always -->
+  <div id="yearlySection" style="margin-bottom:20px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:3px;height:20px;background:var(--accent);border-radius:2px;"></div>
+      <span style="font-family:'Oswald',sans-serif;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--accent);">📊 Summary — <span class="yearly-section-label"></span></span>
     </div>
-    <div class="kpi-card amber">
-      <div class="kpi-icon">📋</div>
-      <div class="kpi-label">Plan Electricity</div>
-      <div class="kpi-value" id="kpi-plan-elec">—</div>
-      <div class="kpi-unit">kWh (รวม)</div>
-    </div>
-    <div class="kpi-card green">
-      <div class="kpi-icon">🏭</div>
-      <div class="kpi-label">Actual Production</div>
-      <div class="kpi-value" id="kpi-actual-prod">—</div>
-      <div class="kpi-unit">BCM (รวม)</div>
-    </div>
-    <div class="kpi-card purple">
-      <div class="kpi-icon">🕐</div>
-      <div class="kpi-label">Working Hours</div>
-      <div class="kpi-value" id="kpi-hours">—</div>
-      <div class="kpi-unit">ชั่วโมง (รวม)</div>
-    </div>
-    <div class="kpi-card red">
-      <div class="kpi-icon">⚙️</div>
-      <div class="kpi-label">Avg Productivity</div>
-      <div class="kpi-value" id="kpi-productivity">—</div>
-      <div class="kpi-unit">BCM / Hr.</div>
-    </div>
-    <div class="kpi-card blue">
-      <div class="kpi-icon">📊</div>
-      <div class="kpi-label">Avg Actual Consumption</div>
-      <div class="kpi-value" id="kpi-consumption">—</div>
-      <div class="kpi-unit">kWh/BCM</div>
-    </div>
-    <div class="kpi-card green" style="--kpi-color:#06b6d4;">
-      <div class="kpi-icon">📏</div>
-      <div class="kpi-label">Actual Line Length</div>
-      <div class="kpi-value" id="kpi-actual-linelen" style="color:#06b6d4;">—</div>
-      <div class="kpi-unit">รวม</div>
-    </div>
-    <div class="kpi-card amber">
-      <div class="kpi-icon">📐</div>
-      <div class="kpi-label">Plan Line Length</div>
-      <div class="kpi-value" id="kpi-plan-linelen">—</div>
-      <div class="kpi-unit">รวม</div>
-    </div>
-    <div class="kpi-card red">
-      <div class="kpi-icon">🏋️</div>
-      <div class="kpi-label">Actual Line Lift</div>
-      <div class="kpi-value" id="kpi-actual-linelift">—</div>
-      <div class="kpi-unit">รวม</div>
-    </div>
-    <div class="kpi-card purple">
-      <div class="kpi-icon">📦</div>
-      <div class="kpi-label">Plan Line Lift</div>
-      <div class="kpi-value" id="kpi-plan-linelift">—</div>
-      <div class="kpi-unit">รวม</div>
-    </div>
-  </div>
-
-  <!-- Dynamic Section: shown when year selected -->
-  <div id="yearlySection" style="display:none;margin-bottom:20px;">
     <!-- Electricity Saving Card + Production Donut -->
     <div class="two-col" style="margin-bottom:20px;">
       <!-- Saving Card -->
@@ -532,8 +472,8 @@
           <span class="panel-title">🏭 Production: Actual vs Plan</span>
         </div>
         <div style="display:flex;align-items:center;justify-content:center;gap:24px;padding:20px;">
-          <div style="position:relative;width:160px;height:160px;flex-shrink:0;">
-            <canvas id="chartProdDonut"></canvas>
+          <div style="position:relative;width:180px;height:180px;flex-shrink:0;">
+            <canvas id="chartProdDonut" width="180" height="180" style="display:block;width:180px;height:180px;"></canvas>
             <div id="donut-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
               <div id="donut-pct" style="font-family:'Share Tech Mono',monospace;font-size:22px;color:var(--accent3);"></div>
               <div style="font-size:10px;color:var(--muted);">Achievement</div>
@@ -843,27 +783,7 @@ function fmt(n, dec=0) {
 }
 
 function updateKPIs(data) {
-  const totalAE = data.reduce((s,d) => s+d.actualElec, 0);
-  const totalPE = data.reduce((s,d) => s+d.planElec, 0);
-  const totalAP = data.reduce((s,d) => s+d.actualProd, 0);
-  const totalHr = data.reduce((s,d) => s+d.workHr, 0);
-  const avgConsump = data.filter(d=>d.actualConsump>0).reduce((s,d,_,arr) => s+d.actualConsump/arr.length, 0);
-  const productivity = totalHr > 0 ? totalAP / totalHr : 0;
-  const totalALL = data.reduce((s,d) => s+d.actualLineLen, 0);
-  const totalPLL = data.reduce((s,d) => s+d.planLineLen, 0);
-  const totalALLift = data.reduce((s,d) => s+d.actualLineLift, 0);
-  const totalPLLift = data.reduce((s,d) => s+d.planLineLift, 0);
-
-  document.getElementById('kpi-actual-elec').textContent = fmt(totalAE/1e6, 2) + 'M';
-  document.getElementById('kpi-plan-elec').textContent = fmt(totalPE/1e6, 2) + 'M';
-  document.getElementById('kpi-actual-prod').textContent = fmt(totalAP/1e6, 3) + 'M';
-  document.getElementById('kpi-hours').textContent = fmt(totalHr);
-  document.getElementById('kpi-productivity').textContent = fmt(productivity, 3);
-  document.getElementById('kpi-consumption').textContent = fmt(avgConsump, 3);
-  document.getElementById('kpi-actual-linelen').textContent = totalALL >= 1e6 ? fmt(totalALL/1e6,2)+'M' : fmt(totalALL);
-  document.getElementById('kpi-plan-linelen').textContent = totalPLL >= 1e6 ? fmt(totalPLL/1e6,2)+'M' : fmt(totalPLL);
-  document.getElementById('kpi-actual-linelift').textContent = totalALLift >= 1e6 ? fmt(totalALLift/1e6,2)+'M' : fmt(totalALLift);
-  document.getElementById('kpi-plan-linelift').textContent = totalPLLift >= 1e6 ? fmt(totalPLLift/1e6,2)+'M' : fmt(totalPLLift);
+  // KPI cards removed — no-op kept for compatibility
 }
 
 function switchChart(type, mode) {
@@ -1281,9 +1201,9 @@ let chartProdDonutInst = null;
 
 function updateYearlySection(data) {
   const sec = document.getElementById('yearlySection');
-  const isYear = selectedYear !== 'ALL';
-  sec.style.display = isYear ? 'block' : 'none';
-  if (!isYear) return;
+  sec.style.display = 'block';
+  const sectionTitle = selectedYear === 'ALL' ? 'ภาพรวมทุกปี' : `ปี ${selectedYear}`;
+  document.querySelectorAll('.yearly-section-label').forEach(el => el.textContent = sectionTitle);
 
   const totalAE  = data.reduce((s,d)=>s+d.actualElec,0);
   const totalPE  = data.reduce((s,d)=>s+d.planElec,0);
@@ -1325,10 +1245,10 @@ function updateYearlySection(data) {
       datasets: [{
         data: over > 0 ? [totalPP, over] : [totalAP, rem],
         backgroundColor: over > 0
-          ? ['rgba(16,185,129,0.8)', 'rgba(16,185,129,0.25)']
-          : ['rgba(16,185,129,0.8)', 'rgba(30,58,95,0.6)'],
+          ? ['rgba(16,185,129,0.85)', 'rgba(16,185,129,0.2)']
+          : ['rgba(16,185,129,0.85)', 'rgba(30,58,95,0.7)'],
         borderColor: over > 0
-          ? ['rgba(16,185,129,1)', 'rgba(16,185,129,0.4)']
+          ? ['rgba(16,185,129,1)', 'rgba(16,185,129,0.35)']
           : ['rgba(16,185,129,1)', 'rgba(30,58,95,1)'],
         borderWidth: 2,
         hoverOffset: 4
@@ -1336,7 +1256,9 @@ function updateYearlySection(data) {
     },
     options: {
       responsive: false,
+      maintainAspectRatio: false,
       cutout: '72%',
+      layout: { padding: 4 },
       plugins: { legend: { display: false }, tooltip: { enabled: false } },
       animation: { animateRotate: true, duration: 700 }
     }

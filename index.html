@@ -836,7 +836,47 @@ async function toggleVA() {
 }
 
 function getCombinedData() {
-  return vaActive ? [...allData, ...vaData].sort((a,b) => a.year!==b.year ? a.year-b.year : a.month-b.month) : allData;
+  if (!vaActive || vaData.length === 0) return allData;
+
+  // Build a lookup key: "year-month" for each VA row
+  const vaMap = {};
+  vaData.forEach(d => { vaMap[`${d.year}-${d.month}`] = d; });
+
+  // Replace matching rows in allData with VA values (keep planXxx from VA which already has lastPlan values)
+  // For rows not in VA, keep original. For rows in VA, merge actual values in, mark isVA:true
+  const merged = allData.map(d => {
+    const key = `${d.year}-${d.month}`;
+    if (vaMap[key]) {
+      const va = vaMap[key];
+      return {
+        ...d,
+        actualElec:     va.actualElec     || d.actualElec,
+        actualProd:     va.actualProd     || d.actualProd,
+        workHr:         va.workHr         || d.workHr,
+        actualConsump:  va.actualConsump  || d.actualConsump,
+        actualLineLen:  va.actualLineLen  || d.actualLineLen,
+        actualLineLift: va.actualLineLift || d.actualLineLift,
+        planElec:       va.planElec       || d.planElec,
+        planProd:       va.planProd       || d.planProd,
+        planConsump:    va.planConsump    || d.planConsump,
+        planLineLen:    va.planLineLen    || d.planLineLen,
+        planLineLift:   va.planLineLift   || d.planLineLift,
+        productivity:   va.workHr > 0 ? va.actualProd / va.workHr : d.productivity,
+        isVA: true
+      };
+    }
+    return d;
+  });
+
+  // Also append any VA rows whose month/year doesn't exist in allData yet (future months)
+  const existingKeys = new Set(allData.map(d => `${d.year}-${d.month}`));
+  vaData.forEach(d => {
+    if (!existingKeys.has(`${d.year}-${d.month}`)) {
+      merged.push(d);
+    }
+  });
+
+  return merged.sort((a,b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
 }
 
 function rebuildYearPills() {

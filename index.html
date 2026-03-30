@@ -427,6 +427,14 @@
   <div class="filter-bar">
     <span class="filter-label">🔍 กรองปี :</span>
     <div class="year-pills" id="yearPills"></div>
+    <button id="btnAddVA" onclick="toggleVA()" style="
+      margin-left:auto;padding:7px 20px;border-radius:4px;
+      border:1.5px solid #a855f7;background:var(--panel);
+      color:#a855f7;font-family:'Oswald',sans-serif;font-size:13px;
+      cursor:pointer;letter-spacing:1.5px;transition:all 0.2s;
+      display:flex;align-items:center;gap:8px;">
+      <span id="btnVAIcon">＋</span> ADD VA
+    </button>
   </div>
 
   <!-- Dynamic Section: shown always -->
@@ -643,6 +651,9 @@ const SHEET_ID = '17ztkMmCj-pO9UbdYwr_THZazD4GZmx-lgqHvs_ou1fA';
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=OPERATION%20DATA`;
 
 let allData = [];
+let vaData = [];
+let vaActive = false;
+const VA_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1290142461`;
 let selectedYear = 'ALL';
 let chartElecMode = 'monthly';
 let chartProdMode = 'monthly';
@@ -687,31 +698,7 @@ async function loadData() {
     const resp = await fetch(CSV_URL);
     const text = await resp.text();
     const lines = text.trim().split('\n');
-    // Skip header row (row 0)
-    for (let i = 1; i < lines.length; i++) {
-      const cols = parseCSVLine(lines[i]);
-      if (!cols || cols.length < 8) continue;
-      const parsed = parseMonthYear(cols[0]);
-      if (!parsed) continue;
-      const actualElec = parseNum(cols[1]);
-      const planElec = parseNum(cols[2]);
-      const actualProd = parseNum(cols[3]);
-      const planProd = parseNum(cols[4]);
-      const workHr = parseNum(cols[5]);
-      const actualConsump = parseNum(cols[6]);
-      const planConsump = parseNum(cols[7]);
-      const actualLineLen = cols.length > 8 ? parseNum(cols[8]) : 0;
-      const planLineLen   = cols.length > 9 ? parseNum(cols[9]) : 0;
-      const actualLineLift = cols.length > 10 ? parseNum(cols[10]) : 0;
-      const planLineLift   = cols.length > 11 ? parseNum(cols[11]) : 0;
-      const productivity = workHr > 0 ? actualProd / workHr : 0;
-      allData.push({
-        ...parsed,
-        actualElec, planElec, actualProd, planProd,
-        workHr, actualConsump, planConsump, productivity,
-        actualLineLen, planLineLen, actualLineLift, planLineLift
-      });
-    }
+    allData = parseDataRows(lines);
     allData.sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
     buildUI();
     document.getElementById('loading').style.display = 'none';
@@ -733,37 +720,105 @@ function parseCSVLine(line) {
   return result;
 }
 
-function buildUI() {
-  buildYearPills();
-  updateAll();
+function parseDataRows(lines) {
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (!cols || cols.length < 2) continue;
+    const parsed = parseMonthYear(cols[0]);
+    if (!parsed) continue;
+    const actualElec    = parseNum(cols[1]);
+    const planElec      = parseNum(cols[2]);
+    const actualProd    = parseNum(cols[3]);
+    const planProd      = parseNum(cols[4]);
+    const workHr        = parseNum(cols[5]);
+    const actualConsump = parseNum(cols[6]);
+    const planConsump   = parseNum(cols[7]);
+    const actualLineLen  = cols.length > 8  ? parseNum(cols[8])  : 0;
+    const planLineLen    = cols.length > 9  ? parseNum(cols[9])  : 0;
+    const actualLineLift = cols.length > 10 ? parseNum(cols[10]) : 0;
+    const planLineLift   = cols.length > 11 ? parseNum(cols[11]) : 0;
+    const productivity   = workHr > 0 ? actualProd / workHr : 0;
+    rows.push({ ...parsed, actualElec, planElec, actualProd, planProd, workHr, actualConsump, planConsump, productivity, actualLineLen, planLineLen, actualLineLift, planLineLift, isVA: false });
+  }
+  return rows;
 }
 
-function buildYearPills() {
-  const years = [...new Set(allData.map(d => d.year))].sort();
+async function toggleVA() {
+  const btn = document.getElementById('btnAddVA');
+  const icon = document.getElementById('btnVAIcon');
+  if (vaActive) {
+    // Turn OFF — remove VA data
+    vaActive = false;
+    vaData = [];
+    btn.style.borderColor = '#a855f7';
+    btn.style.background = 'var(--panel)';
+    btn.style.color = '#a855f7';
+    btn.style.boxShadow = '';
+    icon.textContent = '＋';
+    rebuildYearPills();
+    updateAll();
+    return;
+  }
+  // Turn ON — fetch VA sheet
+  btn.textContent = '⏳ กำลังโหลด...';
+  btn.disabled = true;
+  try {
+    const resp = await fetch(VA_CSV_URL);
+    const text = await resp.text();
+    const lines = text.trim().split('\n');
+    vaData = parseDataRows(lines).map(d => ({ ...d, isVA: true }));
+    vaActive = true;
+    btn.innerHTML = '<span id="btnVAIcon">✕</span> REMOVE VA';
+    btn.style.borderColor = '#ff6b9d';
+    btn.style.background = 'rgba(168,85,247,0.15)';
+    btn.style.color = '#ff6b9d';
+    btn.style.boxShadow = '0 0 16px rgba(168,85,247,0.4)';
+    rebuildYearPills();
+    updateAll();
+  } catch(e) {
+    btn.innerHTML = '<span id="btnVAIcon">＋</span> ADD VA';
+    btn.disabled = false;
+    alert('ไม่สามารถโหลด ADDITION VA Sheet ได้ — กรุณาตรวจสอบการเข้าถึง');
+    console.error(e);
+  }
+  btn.disabled = false;
+}
+
+function getCombinedData() {
+  return vaActive ? [...allData, ...vaData].sort((a,b) => a.year!==b.year ? a.year-b.year : a.month-b.month) : allData;
+}
+
+function rebuildYearPills() {
+  const years = [...new Set(getCombinedData().map(d => d.year))].sort();
   const container = document.getElementById('yearPills');
   container.innerHTML = '';
-
   const allBtn = document.createElement('button');
-  allBtn.className = 'year-pill all-pill active';
+  allBtn.className = 'year-pill all-pill' + (selectedYear==='ALL'?' active':'');
   allBtn.textContent = 'ทั้งหมด';
   allBtn.onclick = () => selectYear('ALL');
   container.appendChild(allBtn);
-
   years.forEach(y => {
     const btn = document.createElement('button');
-    btn.className = 'year-pill';
+    btn.className = 'year-pill' + (selectedYear==y?' active':'');
     btn.textContent = y;
     btn.onclick = () => selectYear(y);
     container.appendChild(btn);
   });
 }
 
+function buildUI() {
+  rebuildYearPills();
+  updateAll();
+}
+
+function buildYearPills() { rebuildYearPills(); }
+
 function selectYear(y) {
   selectedYear = y;
   document.querySelectorAll('.year-pill').forEach(b => b.classList.remove('active'));
-  const allPill = document.querySelector('.all-pill');
   if (y === 'ALL') {
-    allPill.classList.add('active');
+    document.querySelector('.all-pill')?.classList.add('active');
   } else {
     document.querySelectorAll('.year-pill:not(.all-pill)').forEach(b => {
       if (b.textContent == y) b.classList.add('active');
@@ -773,8 +828,9 @@ function selectYear(y) {
 }
 
 function getFiltered() {
-  if (selectedYear === 'ALL') return allData;
-  return allData.filter(d => d.year === selectedYear);
+  const combined = getCombinedData();
+  if (selectedYear === 'ALL') return combined;
+  return combined.filter(d => d.year === selectedYear);
 }
 
 function fmt(n, dec=0) {
@@ -817,40 +873,52 @@ function groupByYear(data, field) {
 
 function updateCharts(data) {
   // ELECTRICITY CHART
-  let elecLabels, elecActual, elecPlan;
-  if (chartElecMode === 'monthly' || selectedYear !== 'ALL') {
-    elecLabels = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
-    elecActual = data.map(d => d.actualElec);
-    elecPlan = data.map(d => d.planElec);
-  } else {
-    const years = [...new Set(data.map(d => d.year))].sort();
-    elecLabels = years.map(String);
-    elecActual = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.actualElec, 0));
-    elecPlan = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.planElec, 0));
-  }
-  // Accumulated lines
-  const elecAccActual = elecActual.reduce((acc, v) => { acc.push((acc.length ? acc[acc.length-1] : 0) + v); return acc; }, []);
-  const elecAccPlan   = elecPlan.reduce((acc, v) => { acc.push((acc.length ? acc[acc.length-1] : 0) + v); return acc; }, []);
+  let elecLabels, elecActual, elecPlan, elecActualVA;
+  const buildElecData = (src) => {
+    if (chartElecMode === 'monthly' || selectedYear !== 'ALL') {
+      return {
+        labels: src.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : '')),
+        actual: src.map(d => d.isVA ? null : d.actualElec),
+        plan:   src.map(d => d.isVA ? null : d.planElec),
+        vaActual: src.map(d => d.isVA ? d.actualElec : null)
+      };
+    } else {
+      const years = [...new Set(src.map(d => d.year))].sort();
+      const normalByYear = y => src.filter(d=>d.year===y&&!d.isVA);
+      const vaByYear = y => src.filter(d=>d.year===y&&d.isVA);
+      return {
+        labels: years.map(String),
+        actual: years.map(y => { const r=normalByYear(y); return r.length?r.reduce((s,d)=>s+d.actualElec,0):null; }),
+        plan:   years.map(y => { const r=normalByYear(y); return r.length?r.reduce((s,d)=>s+d.planElec,0):null; }),
+        vaActual: years.map(y => { const r=vaByYear(y); return r.length?r.reduce((s,d)=>s+d.actualElec,0):null; })
+      };
+    }
+  };
+  const eData = buildElecData(data);
+  elecLabels = eData.labels; elecActual = eData.actual; elecPlan = eData.plan; elecActualVA = eData.vaActual;
+  const hasVA = vaActive && elecActualVA.some(v=>v!==null);
+
+  const elecAccActual = elecActual.map((v,i) => (v??elecActualVA[i]??0)).reduce((acc,v,i) => { acc.push((acc[i-1]||0)+v); return acc; }, []);
+  const elecAccPlan   = elecPlan.reduce((acc,v,i) => { acc.push((acc[i-1]||0)+(v||0)); return acc; }, []);
 
   if (chartElecInst) chartElecInst.destroy();
+  const elecDatasets = [
+    { label: 'Actual (kWh)', data: elecActual, backgroundColor: 'rgba(0,212,255,0.55)', borderColor: 'rgba(0,212,255,1)', borderWidth: 1, borderRadius: 3, order: 2 },
+    { label: 'Plan (kWh)',   data: elecPlan,   backgroundColor: 'rgba(245,158,11,0.35)', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1, borderRadius: 3, order: 2 },
+    { label: 'Acc. Actual', data: elecAccActual, type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(0,255,180,0.9)', backgroundColor: 'rgba(0,255,180,0)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 2.5, pointBackgroundColor: '#00ffb4', order: 1 },
+    { label: 'Acc. Plan',   data: elecAccPlan,   type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(255,200,0,0.7)',  backgroundColor: 'rgba(255,200,0,0)',  borderWidth: 1.5, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#ffc800', borderDash: [5,4], order: 1 }
+  ];
+  if (hasVA) {
+    elecDatasets.splice(1, 0, { label: 'VA Actual (kWh)', data: elecActualVA, backgroundColor: 'rgba(255,107,157,0.7)', borderColor: 'rgba(255,107,157,1)', borderWidth: 1.5, borderRadius: 3, order: 2 });
+  }
   chartElecInst = new Chart(document.getElementById('chartElec'), {
-    type: 'bar',
-    data: {
-      labels: elecLabels,
-      datasets: [
-        { label: 'Actual (kWh)', data: elecActual, backgroundColor: 'rgba(0,212,255,0.55)', borderColor: 'rgba(0,212,255,1)', borderWidth: 1, borderRadius: 3, order: 2 },
-        { label: 'Plan (kWh)', data: elecPlan, backgroundColor: 'rgba(245,158,11,0.35)', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1, borderRadius: 3, order: 2 },
-        { label: 'Acc. Actual', data: elecAccActual, type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(0,255,180,0.9)', backgroundColor: 'rgba(0,255,180,0)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 2.5, pointBackgroundColor: '#00ffb4', borderDash: [0], order: 1 },
-        { label: 'Acc. Plan',   data: elecAccPlan,   type: 'line', yAxisID: 'yAcc', borderColor: 'rgba(255,200,0,0.7)',  backgroundColor: 'rgba(255,200,0,0)',  borderWidth: 1.5, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#ffc800', borderDash: [5,4], order: 1 }
-      ]
-    },
+    type: 'bar', data: { labels: elecLabels, datasets: elecDatasets },
     options: {
-      responsive: true,
-      interaction: { mode: 'index', intersect: false },
+      responsive: true, interaction: { mode: 'index', intersect: false },
       plugins: {
         legend: { labels: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 }, boxWidth: 12, padding: 10 } },
         tooltip: { backgroundColor: '#1a2235', titleColor: '#00d4ff', bodyColor: '#e2e8f0', borderColor: '#1e3a5f', borderWidth: 1,
-          callbacks: { label: ctx => { const v = ctx.parsed.y; return ` ${ctx.dataset.label}: ${v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':v.toLocaleString()}`; } }
+          callbacks: { label: ctx => { const v = ctx.parsed.y; if(v===null)return null; return ` ${ctx.dataset.label}: ${v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'K':v.toLocaleString()}`; } }
         }
       },
       scales: {
@@ -862,33 +930,36 @@ function updateCharts(data) {
   });
 
   // PRODUCTION + PRODUCTIVITY CHART
-  let prodLabels, prodActual, prodivity;
+  let prodLabels, prodActual, prodActualVA, prodivity;
   if (chartProdMode === 'monthly' || selectedYear !== 'ALL') {
-    prodLabels = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
-    prodActual = data.map(d => d.actualProd);
-    prodivity = data.map(d => d.productivity);
+    prodLabels   = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
+    prodActual   = data.map(d => d.isVA ? null : d.actualProd);
+    prodActualVA = data.map(d => d.isVA ? d.actualProd : null);
+    prodivity    = data.map(d => d.productivity);
   } else {
     const years = [...new Set(data.map(d => d.year))].sort();
-    prodLabels = years.map(String);
-    prodActual = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.actualProd, 0));
-    prodivity = years.map(y => {
+    prodLabels   = years.map(String);
+    prodActual   = years.map(y => { const r=data.filter(d=>d.year===y&&!d.isVA); return r.length?r.reduce((s,d)=>s+d.actualProd,0):null; });
+    prodActualVA = years.map(y => { const r=data.filter(d=>d.year===y&&d.isVA);  return r.length?r.reduce((s,d)=>s+d.actualProd,0):null; });
+    prodivity    = years.map(y => {
       const yData = data.filter(d => d.year === y);
-      const totHr = yData.reduce((s,d) => s+d.workHr, 0);
-      const totProd = yData.reduce((s,d) => s+d.actualProd, 0);
+      const totHr = yData.reduce((s,d)=>s+d.workHr,0);
+      const totProd = yData.reduce((s,d)=>s+d.actualProd,0);
       return totHr > 0 ? totProd/totHr : 0;
     });
   }
+  const hasProdVA = vaActive && prodActualVA.some(v=>v!==null);
 
   if (chartProdInst) chartProdInst.destroy();
+  const prodDatasets = [
+    { label: 'Actual Prod (BCM)', data: prodActual, backgroundColor: 'rgba(16,185,129,0.55)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 3 },
+    { label: 'Productivity (BCM/Hr)', data: prodivity, type: 'line', yAxisID: 'y2', backgroundColor: 'rgba(168,85,247,0.3)', borderColor: 'rgba(168,85,247,0.9)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 3, pointBackgroundColor: '#a855f7' }
+  ];
+  if (hasProdVA) {
+    prodDatasets.splice(1, 0, { label: 'VA Actual Prod (BCM)', data: prodActualVA, backgroundColor: 'rgba(255,107,157,0.7)', borderColor: 'rgba(255,107,157,1)', borderWidth: 1.5, borderRadius: 3 });
+  }
   chartProdInst = new Chart(document.getElementById('chartProd'), {
-    type: 'bar',
-    data: {
-      labels: prodLabels,
-      datasets: [
-        { label: 'Actual Prod (BCM)', data: prodActual, backgroundColor: 'rgba(16,185,129,0.55)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 3 },
-        { label: 'Productivity (BCM/Hr)', data: prodivity, type: 'line', yAxisID: 'y2', backgroundColor: 'rgba(168,85,247,0.3)', borderColor: 'rgba(168,85,247,0.9)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 3, pointBackgroundColor: '#a855f7' }
-      ]
-    },
+    type: 'bar', data: { labels: prodLabels, datasets: prodDatasets },
     options: chartOptionsDual('BCM', 'BCM/Hr')
   });
 
@@ -1162,14 +1233,16 @@ function updateTable(data) {
 
   data.forEach(d => {
     const tr = document.createElement('tr');
+    if (d.isVA) tr.style.background = 'rgba(168,85,247,0.07)';
     const diffElec = d.actualElec - d.planElec;
     const elecClass = diffElec > 0 ? 'badge-bad' : diffElec < 0 ? 'badge-good' : '';
     const diffLen = d.actualLineLen - d.planLineLen;
     const lenClass = diffLen > 0 ? 'badge-good' : diffLen < 0 ? 'badge-warn' : '';
     const diffLift = d.actualLineLift - d.planLineLift;
     const liftClass = diffLift > 0 ? 'badge-good' : diffLift < 0 ? 'badge-warn' : '';
+    const vaTag = d.isVA ? ' <span style="font-size:9px;background:rgba(168,85,247,0.3);color:#d8b4fe;border-radius:3px;padding:1px 5px;font-family:\'Oswald\',sans-serif;letter-spacing:1px;">VA</span>' : '';
     tr.innerHTML = `
-      <td>${d.label}</td>
+      <td>${d.label}${vaTag}</td>
       <td class="${elecClass}">${fmt(d.actualElec)}</td>
       <td>${fmt(d.planElec)}</td>
       <td>${fmt(d.actualProd,3)}</td>

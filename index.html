@@ -850,10 +850,10 @@ function updateCharts(data) {
   } else {
     const yrs = [...new Set(data.map(d => d.year))].sort();
     lcLabels      = yrs.map(String);
-    lcActualLen   = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualLineLen,0));
-    lcPlanLen     = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planLineLen,0));
-    lcActualLift  = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualLineLift,0));
-    lcPlanLift    = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planLineLift,0));
+    lcActualLen   = yrs.map(y => { const rows = data.filter(d=>d.year===y && d.actualLineLen>0); return rows.length ? rows.reduce((s,d)=>s+d.actualLineLen,0)/rows.length : 0; });
+    lcPlanLen     = yrs.map(y => { const rows = data.filter(d=>d.year===y && d.planLineLen>0);   return rows.length ? rows.reduce((s,d)=>s+d.planLineLen,0)/rows.length   : 0; });
+    lcActualLift  = yrs.map(y => { const rows = data.filter(d=>d.year===y && d.actualLineLift>0); return rows.length ? rows.reduce((s,d)=>s+d.actualLineLift,0)/rows.length : 0; });
+    lcPlanLift    = yrs.map(y => { const rows = data.filter(d=>d.year===y && d.planLineLift>0);   return rows.length ? rows.reduce((s,d)=>s+d.planLineLift,0)/rows.length   : 0; });
     lcActualElec  = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualElec,0));
     lcPlanElec    = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planElec,0));
   }
@@ -958,6 +958,9 @@ function updateCharts(data) {
           borderWidth: 1,
           padding: 12,
           callbacks: {
+            title: function(items) {
+              return items[0].label + (!isMonthly(chartLineCombinedMode, selectedYear) ? '  (Length/Lift = ค่าเฉลี่ย)' : '');
+            },
             label: function(ctx) {
               const v = ctx.parsed.y;
               const fmtV = v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e3 ? (v/1e3).toFixed(1)+'K' : v.toLocaleString();
@@ -973,7 +976,7 @@ function updateCharts(data) {
         },
         yLen: {
           position: 'left',
-          title: { display: true, text: 'Line Length', color: '#06b6d4', font: { size: 10 } },
+          title: { display: true, text: isMonthly(chartLineCombinedMode, selectedYear) ? 'Line Length' : 'Avg Line Length', color: '#06b6d4', font: { size: 10 } },
           ticks: {
             color: '#06b6d4',
             font: { size: 10 },
@@ -983,7 +986,7 @@ function updateCharts(data) {
         },
         yLift: {
           position: 'left',
-          title: { display: true, text: 'Line Lift', color: '#f43f5e', font: { size: 10 } },
+          title: { display: true, text: isMonthly(chartLineCombinedMode, selectedYear) ? 'Line Lift' : 'Avg Line Lift', color: '#f43f5e', font: { size: 10 } },
           ticks: {
             color: '#f43f5e',
             font: { size: 10 },

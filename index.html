@@ -467,6 +467,30 @@
       <div class="kpi-value" id="kpi-consumption">—</div>
       <div class="kpi-unit">kWh/BCM</div>
     </div>
+    <div class="kpi-card green" style="--kpi-color:#06b6d4;">
+      <div class="kpi-icon">📏</div>
+      <div class="kpi-label">Actual Line Length</div>
+      <div class="kpi-value" id="kpi-actual-linelen" style="color:#06b6d4;">—</div>
+      <div class="kpi-unit">รวม</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon">📐</div>
+      <div class="kpi-label">Plan Line Length</div>
+      <div class="kpi-value" id="kpi-plan-linelen">—</div>
+      <div class="kpi-unit">รวม</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">🏋️</div>
+      <div class="kpi-label">Actual Line Lift</div>
+      <div class="kpi-value" id="kpi-actual-linelift">—</div>
+      <div class="kpi-unit">รวม</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">📦</div>
+      <div class="kpi-label">Plan Line Lift</div>
+      <div class="kpi-value" id="kpi-plan-linelift">—</div>
+      <div class="kpi-unit">รวม</div>
+    </div>
   </div>
 
   <!-- Charts -->
@@ -497,6 +521,34 @@
     </div>
   </div>
 
+  <!-- Charts Row 2: Line Length & Line Lift vs Electricity -->
+  <div class="two-col" style="margin-bottom:20px;">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" style="color:#06b6d4;">📏 Line Length vs Electricity</span>
+        <div class="chart-tabs">
+          <button class="chart-tab active" onclick="switchChart('linelen','monthly')">รายเดือน</button>
+          <button class="chart-tab" onclick="switchChart('linelen','yearly')">รายปี</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartLineLen" height="220"></canvas>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title" style="color:#f43f5e;">🏋️ Line Lift vs Electricity</span>
+        <div class="chart-tabs">
+          <button class="chart-tab active" onclick="switchChart('linelift','monthly')">รายเดือน</button>
+          <button class="chart-tab" onclick="switchChart('linelift','yearly')">รายปี</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartLineLift" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- Detail Table -->
   <div class="panel">
     <div class="panel-header">
@@ -516,6 +568,10 @@
             <th>Actual Consump (kWh/BCM)</th>
             <th>Plan Consump (kWh/BCM)</th>
             <th>Productivity (BCM/Hr.)</th>
+            <th>Actual Line Length</th>
+            <th>Plan Line Length</th>
+            <th>Actual Line Lift</th>
+            <th>Plan Line Lift</th>
           </tr>
         </thead>
         <tbody id="tableBody"></tbody>
@@ -535,8 +591,12 @@ let allData = [];
 let selectedYear = 'ALL';
 let chartElecMode = 'monthly';
 let chartProdMode = 'monthly';
+let chartLineLenMode = 'monthly';
+let chartLineLiftMode = 'monthly';
 let chartElecInst = null;
 let chartProdInst = null;
+let chartLineLenInst = null;
+let chartLineLiftInst = null;
 
 const THAI_MONTHS = {
   'มกราคม': 1, 'กุมภาพันธ์': 2, 'มีนาคม': 3, 'เมษายน': 4,
@@ -583,11 +643,16 @@ async function loadData() {
       const workHr = parseNum(cols[5]);
       const actualConsump = parseNum(cols[6]);
       const planConsump = parseNum(cols[7]);
+      const actualLineLen = cols.length > 8 ? parseNum(cols[8]) : 0;
+      const planLineLen   = cols.length > 9 ? parseNum(cols[9]) : 0;
+      const actualLineLift = cols.length > 10 ? parseNum(cols[10]) : 0;
+      const planLineLift   = cols.length > 11 ? parseNum(cols[11]) : 0;
       const productivity = workHr > 0 ? actualProd / workHr : 0;
       allData.push({
         ...parsed,
         actualElec, planElec, actualProd, planProd,
-        workHr, actualConsump, planConsump, productivity
+        workHr, actualConsump, planConsump, productivity,
+        actualLineLen, planLineLen, actualLineLift, planLineLift
       });
     }
     allData.sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
@@ -667,6 +732,10 @@ function updateKPIs(data) {
   const totalHr = data.reduce((s,d) => s+d.workHr, 0);
   const avgConsump = data.filter(d=>d.actualConsump>0).reduce((s,d,_,arr) => s+d.actualConsump/arr.length, 0);
   const productivity = totalHr > 0 ? totalAP / totalHr : 0;
+  const totalALL = data.reduce((s,d) => s+d.actualLineLen, 0);
+  const totalPLL = data.reduce((s,d) => s+d.planLineLen, 0);
+  const totalALLift = data.reduce((s,d) => s+d.actualLineLift, 0);
+  const totalPLLift = data.reduce((s,d) => s+d.planLineLift, 0);
 
   document.getElementById('kpi-actual-elec').textContent = fmt(totalAE/1e6, 2) + 'M';
   document.getElementById('kpi-plan-elec').textContent = fmt(totalPE/1e6, 2) + 'M';
@@ -674,6 +743,10 @@ function updateKPIs(data) {
   document.getElementById('kpi-hours').textContent = fmt(totalHr);
   document.getElementById('kpi-productivity').textContent = fmt(productivity, 3);
   document.getElementById('kpi-consumption').textContent = fmt(avgConsump, 3);
+  document.getElementById('kpi-actual-linelen').textContent = totalALL >= 1e6 ? fmt(totalALL/1e6,2)+'M' : fmt(totalALL);
+  document.getElementById('kpi-plan-linelen').textContent = totalPLL >= 1e6 ? fmt(totalPLL/1e6,2)+'M' : fmt(totalPLL);
+  document.getElementById('kpi-actual-linelift').textContent = totalALLift >= 1e6 ? fmt(totalALLift/1e6,2)+'M' : fmt(totalALLift);
+  document.getElementById('kpi-plan-linelift').textContent = totalPLLift >= 1e6 ? fmt(totalPLLift/1e6,2)+'M' : fmt(totalPLLift);
 }
 
 function switchChart(type, mode) {
@@ -682,9 +755,19 @@ function switchChart(type, mode) {
     document.querySelectorAll('[onclick*="switchChart(\'elec\'"]').forEach(b => {
       b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
     });
-  } else {
+  } else if (type === 'prod') {
     chartProdMode = mode;
     document.querySelectorAll('[onclick*="switchChart(\'prod\'"]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
+    });
+  } else if (type === 'linelen') {
+    chartLineLenMode = mode;
+    document.querySelectorAll('[onclick*="switchChart(\'linelen\'"]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
+    });
+  } else if (type === 'linelift') {
+    chartLineLiftMode = mode;
+    document.querySelectorAll('[onclick*="switchChart(\'linelift\'"]').forEach(b => {
       b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
     });
   }
@@ -757,6 +840,71 @@ function updateCharts(data) {
     },
     options: chartOptionsDual('BCM', 'BCM/Hr')
   });
+
+  // LINE LENGTH vs ELECTRICITY CHART
+  let llLabels, llActualLen, llPlanLen, llActualElec, llPlanElec;
+  const isMonthly = (mode, yr) => mode === 'monthly' || yr !== 'ALL';
+  if (isMonthly(chartLineLenMode, selectedYear)) {
+    llLabels = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
+    llActualLen  = data.map(d => d.actualLineLen);
+    llPlanLen    = data.map(d => d.planLineLen);
+    llActualElec = data.map(d => d.actualElec);
+    llPlanElec   = data.map(d => d.planElec);
+  } else {
+    const yrs = [...new Set(data.map(d => d.year))].sort();
+    llLabels     = yrs.map(String);
+    llActualLen  = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualLineLen,0));
+    llPlanLen    = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planLineLen,0));
+    llActualElec = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualElec,0));
+    llPlanElec   = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planElec,0));
+  }
+
+  if (chartLineLenInst) chartLineLenInst.destroy();
+  chartLineLenInst = new Chart(document.getElementById('chartLineLen'), {
+    type: 'bar',
+    data: {
+      labels: llLabels,
+      datasets: [
+        { label: 'Actual Line Length', data: llActualLen, backgroundColor: 'rgba(6,182,212,0.55)', borderColor: 'rgba(6,182,212,1)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Plan Line Length',   data: llPlanLen,   backgroundColor: 'rgba(6,182,212,0.2)',  borderColor: 'rgba(6,182,212,0.6)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Actual Elec (kWh)', data: llActualElec, type: 'line', yAxisID: 'y2', borderColor: 'rgba(0,212,255,0.9)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#00d4ff' },
+        { label: 'Plan Elec (kWh)',   data: llPlanElec,   type: 'line', yAxisID: 'y2', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1.5, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#f59e0b', borderDash: [5,3] }
+      ]
+    },
+    options: chartOptionsDualCustom('Line Length', 'kWh', '#06b6d4', '#00d4ff')
+  });
+
+  // LINE LIFT vs ELECTRICITY CHART
+  let liftLabels, liftActual, liftPlan, liftActualElec, liftPlanElec;
+  if (isMonthly(chartLineLiftMode, selectedYear)) {
+    liftLabels     = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
+    liftActual     = data.map(d => d.actualLineLift);
+    liftPlan       = data.map(d => d.planLineLift);
+    liftActualElec = data.map(d => d.actualElec);
+    liftPlanElec   = data.map(d => d.planElec);
+  } else {
+    const yrs = [...new Set(data.map(d => d.year))].sort();
+    liftLabels     = yrs.map(String);
+    liftActual     = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualLineLift,0));
+    liftPlan       = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planLineLift,0));
+    liftActualElec = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.actualElec,0));
+    liftPlanElec   = yrs.map(y => data.filter(d=>d.year===y).reduce((s,d)=>s+d.planElec,0));
+  }
+
+  if (chartLineLiftInst) chartLineLiftInst.destroy();
+  chartLineLiftInst = new Chart(document.getElementById('chartLineLift'), {
+    type: 'bar',
+    data: {
+      labels: liftLabels,
+      datasets: [
+        { label: 'Actual Line Lift', data: liftActual, backgroundColor: 'rgba(244,63,94,0.55)', borderColor: 'rgba(244,63,94,1)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Plan Line Lift',   data: liftPlan,   backgroundColor: 'rgba(244,63,94,0.2)',  borderColor: 'rgba(244,63,94,0.6)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Actual Elec (kWh)', data: liftActualElec, type: 'line', yAxisID: 'y2', borderColor: 'rgba(0,212,255,0.9)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#00d4ff' },
+        { label: 'Plan Elec (kWh)',   data: liftPlanElec,   type: 'line', yAxisID: 'y2', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1.5, tension: 0.4, fill: false, pointRadius: 2, pointBackgroundColor: '#f59e0b', borderDash: [5,3] }
+      ]
+    },
+    options: chartOptionsDualCustom('Line Lift', 'kWh', '#f43f5e', '#00d4ff')
+  });
 }
 
 function chartOptions(unit) {
@@ -788,6 +936,31 @@ function chartOptionsDual(unit1, unit2) {
   };
 }
 
+function chartOptionsDualCustom(leftLabel, rightLabel, leftColor, rightColor) {
+  return {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 }, boxWidth: 12 } },
+      tooltip: { backgroundColor: '#1a2235', titleColor: leftColor, bodyColor: '#e2e8f0', borderColor: '#1e3a5f', borderWidth: 1 }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(30,58,95,0.4)' } },
+      y: {
+        title: { display: true, text: leftLabel, color: leftColor, font: { size: 10 } },
+        ticks: { color: leftColor, font: { size: 10 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v },
+        grid: { color: 'rgba(30,58,95,0.4)' }
+      },
+      y2: {
+        position: 'right',
+        title: { display: true, text: rightLabel, color: rightColor, font: { size: 10 } },
+        ticks: { color: rightColor, font: { size: 10 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v },
+        grid: { drawOnChartArea: false }
+      }
+    }
+  };
+}
+
 function updateTable(data) {
   const tbody = document.getElementById('tableBody');
   tbody.innerHTML = '';
@@ -799,6 +972,10 @@ function updateTable(data) {
     actualProd: data.reduce((s,d)=>s+d.actualProd,0),
     planProd: data.reduce((s,d)=>s+d.planProd,0),
     workHr: data.reduce((s,d)=>s+d.workHr,0),
+    actualLineLen: data.reduce((s,d)=>s+d.actualLineLen,0),
+    planLineLen: data.reduce((s,d)=>s+d.planLineLen,0),
+    actualLineLift: data.reduce((s,d)=>s+d.actualLineLift,0),
+    planLineLift: data.reduce((s,d)=>s+d.planLineLift,0),
   };
   totals.productivity = totals.workHr > 0 ? totals.actualProd / totals.workHr : 0;
   const validConsump = data.filter(d=>d.actualConsump>0);
@@ -817,6 +994,10 @@ function updateTable(data) {
     <td>${fmt(totals.actualConsump,3)}</td>
     <td>${fmt(totals.planConsump,3)}</td>
     <td>${fmt(totals.productivity,4)}</td>
+    <td>${fmt(totals.actualLineLen)}</td>
+    <td>${fmt(totals.planLineLen)}</td>
+    <td>${fmt(totals.actualLineLift)}</td>
+    <td>${fmt(totals.planLineLift)}</td>
   `;
   tbody.appendChild(sumRow);
 
@@ -824,6 +1005,10 @@ function updateTable(data) {
     const tr = document.createElement('tr');
     const diffElec = d.actualElec - d.planElec;
     const elecClass = diffElec > 0 ? 'badge-bad' : diffElec < 0 ? 'badge-good' : '';
+    const diffLen = d.actualLineLen - d.planLineLen;
+    const lenClass = diffLen > 0 ? 'badge-good' : diffLen < 0 ? 'badge-warn' : '';
+    const diffLift = d.actualLineLift - d.planLineLift;
+    const liftClass = diffLift > 0 ? 'badge-good' : diffLift < 0 ? 'badge-warn' : '';
     tr.innerHTML = `
       <td>${d.label}</td>
       <td class="${elecClass}">${fmt(d.actualElec)}</td>
@@ -834,6 +1019,10 @@ function updateTable(data) {
       <td>${fmt(d.actualConsump,3)}</td>
       <td>${fmt(d.planConsump,3)}</td>
       <td class="badge-good">${fmt(d.productivity,4)}</td>
+      <td class="${lenClass}">${fmt(d.actualLineLen)}</td>
+      <td>${fmt(d.planLineLen)}</td>
+      <td class="${liftClass}">${fmt(d.actualLineLift)}</td>
+      <td>${fmt(d.planLineLift)}</td>
     `;
     tbody.appendChild(tr);
   });

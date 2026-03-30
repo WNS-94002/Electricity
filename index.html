@@ -565,8 +565,8 @@
       <div class="panel-header">
         <span class="panel-title">⚡ Electricity: Actual vs Plan</span>
         <div class="chart-tabs">
-          <button class="chart-tab active" onclick="switchChart('elec','monthly')">รายเดือน</button>
-          <button class="chart-tab" onclick="switchChart('elec','yearly')">รายปี</button>
+          <button class="chart-tab" onclick="switchChart('elec','monthly')">รายเดือน</button>
+          <button class="chart-tab active" onclick="switchChart('elec','yearly')">รายปี</button>
         </div>
       </div>
       <div class="chart-wrap">
@@ -577,8 +577,8 @@
       <div class="panel-header">
         <span class="panel-title">🏭 Production vs Productivity</span>
         <div class="chart-tabs">
-          <button class="chart-tab active" onclick="switchChart('prod','monthly')">รายเดือน</button>
-          <button class="chart-tab" onclick="switchChart('prod','yearly')">รายปี</button>
+          <button class="chart-tab" onclick="switchChart('prod','monthly')">รายเดือน</button>
+          <button class="chart-tab active" onclick="switchChart('prod','yearly')">รายปี</button>
         </div>
       </div>
       <div class="chart-wrap">
@@ -603,8 +603,8 @@
           </div>
         </div>
         <div class="chart-tabs">
-          <button class="chart-tab active" onclick="switchChart('linecombined','monthly')">รายเดือน</button>
-          <button class="chart-tab" onclick="switchChart('linecombined','yearly')">รายปี</button>
+          <button class="chart-tab" onclick="switchChart('linecombined','monthly')">รายเดือน</button>
+          <button class="chart-tab active" onclick="switchChart('linecombined','yearly')">รายปี</button>
         </div>
       </div>
       <div class="chart-wrap">
@@ -656,11 +656,11 @@ let vaData = [];
 let vaActive = false;
 const VA_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=1290142461`;
 let selectedYear = 'ALL';
-let chartElecMode = 'monthly';
-let chartProdMode = 'monthly';
-let chartLineLenMode = 'monthly';
-let chartLineLiftMode = 'monthly';
-let chartLineCombinedMode = 'monthly';
+let chartElecMode = 'yearly';
+let chartProdMode = 'yearly';
+let chartLineLenMode = 'yearly';
+let chartLineLiftMode = 'yearly';
+let chartLineCombinedMode = 'yearly';
 let chartElecInst = null;
 let chartProdInst = null;
 let chartLineLenInst = null;

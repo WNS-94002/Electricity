@@ -435,6 +435,7 @@
       display:flex;align-items:center;gap:8px;">
       <span id="btnVAIcon">＋</span> ADD VA
     </button>
+    <span id="vaLoadInfo" style="display:none;font-size:11px;color:#a855f7;font-family:'Share Tech Mono',monospace;"></span>
   </div>
 
   <!-- Dynamic Section: shown always -->
@@ -744,42 +745,91 @@ function parseDataRows(lines) {
   return rows;
 }
 
+// Parse ADDITION VA sheet — same label format as OPERATION DATA, only isVA:true for color
+// VA col: A=Month, B=ActualElec, C=ActualProd, D=WorkingHr, E=ActualConsump, F=ActualLineLen, G=ActualLineLift
+// Plan columns inherited from lastPlan (last row of OPERATION DATA)
+function parseVARows(lines, lastPlan) {
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = parseCSVLine(lines[i]);
+    if (!cols || cols.length < 2) continue;
+    const parsed = parseMonthYear(cols[0]);
+    if (!parsed) continue;
+    const actualElec     = parseNum(cols[1]);
+    const actualProd     = parseNum(cols[2]);
+    const workHr         = parseNum(cols[3]);
+    const actualConsump  = parseNum(cols[4]);
+    const actualLineLen  = cols.length > 5 ? parseNum(cols[5]) : 0;
+    const actualLineLift = cols.length > 6 ? parseNum(cols[6]) : 0;
+    const productivity   = workHr > 0 ? actualProd / workHr : 0;
+    rows.push({
+      ...parsed,
+      // label stays as-is: e.g. "มีนาคม 2026" — no VA suffix
+      actualElec,
+      planElec:      lastPlan.planElec,
+      actualProd,
+      planProd:      lastPlan.planProd,
+      workHr,
+      actualConsump,
+      planConsump:   lastPlan.planConsump,
+      productivity,
+      actualLineLen,
+      planLineLen:   lastPlan.planLineLen,
+      actualLineLift,
+      planLineLift:  lastPlan.planLineLift,
+      isVA: true   // only used for bar color distinction
+    });
+  }
+  return rows;
+}
+
 async function toggleVA() {
   const btn = document.getElementById('btnAddVA');
-  const icon = document.getElementById('btnVAIcon');
   if (vaActive) {
-    // Turn OFF — remove VA data
     vaActive = false;
     vaData = [];
     btn.style.borderColor = '#a855f7';
     btn.style.background = 'var(--panel)';
     btn.style.color = '#a855f7';
     btn.style.boxShadow = '';
-    icon.textContent = '＋';
+    btn.innerHTML = '<span id="btnVAIcon">＋</span> ADD VA';
+    const infoOff = document.getElementById('vaLoadInfo');
+    if (infoOff) { infoOff.style.display = 'none'; }
     rebuildYearPills();
     updateAll();
     return;
   }
-  // Turn ON — fetch VA sheet
-  btn.textContent = '⏳ กำลังโหลด...';
+  btn.innerHTML = '⏳ กำลังโหลด...';
   btn.disabled = true;
   try {
     const resp = await fetch(VA_CSV_URL);
     const text = await resp.text();
     const lines = text.trim().split('\n');
-    vaData = parseDataRows(lines).map(d => ({ ...d, isVA: true }));
+    // Get plan values from the last row of OPERATION DATA
+    const lastRow = allData[allData.length - 1] || {};
+    const lastPlan = {
+      planElec:     lastRow.planElec     || 0,
+      planProd:     lastRow.planProd     || 0,
+      planConsump:  lastRow.planConsump  || 0,
+      planLineLen:  lastRow.planLineLen  || 0,
+      planLineLift: lastRow.planLineLift || 0,
+    };
+    vaData = parseVARows(lines, lastPlan);
+    if (vaData.length === 0) throw new Error('ไม่พบข้อมูลใน ADDITION VA Sheet');
     vaActive = true;
     btn.innerHTML = '<span id="btnVAIcon">✕</span> REMOVE VA';
     btn.style.borderColor = '#ff6b9d';
     btn.style.background = 'rgba(168,85,247,0.15)';
     btn.style.color = '#ff6b9d';
     btn.style.boxShadow = '0 0 16px rgba(168,85,247,0.4)';
+    const info = document.getElementById('vaLoadInfo');
+    if (info) { info.textContent = `✓ โหลดแล้ว ${vaData.length} เดือน`; info.style.display = 'inline'; }
     rebuildYearPills();
     updateAll();
   } catch(e) {
     btn.innerHTML = '<span id="btnVAIcon">＋</span> ADD VA';
     btn.disabled = false;
-    alert('ไม่สามารถโหลด ADDITION VA Sheet ได้ — กรุณาตรวจสอบการเข้าถึง');
+    alert(`ไม่สามารถโหลด ADDITION VA Sheet ได้\n${e.message}\nกรุณาตรวจสอบว่า Sheet เปิดเป็น Public`);
     console.error(e);
   }
   btn.disabled = false;

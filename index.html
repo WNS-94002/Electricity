@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ITH Electricity Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Oswald:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --panel: #111827;
+    --panel2: #1a2235;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent2: #f59e0b;
+    --accent3: #10b981;
+    --accent4: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --grid: rgba(0,212,255,0.05);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    min-height: 100vh;
+    background-image: 
+      repeating-linear-gradient(0deg, transparent, transparent 39px, var(--grid) 39px, var(--grid) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, var(--grid) 39px, var(--grid) 40px);
+  }
+
+  header {
+    background: linear-gradient(135deg, #0d1b2a 0%, #1a2f4a 50%, #0d1b2a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 4px 30px rgba(0,212,255,0.15);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .logo-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--accent), #0080ff);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 0 20px rgba(0,212,255,0.4);
+  }
+
+  .header-title h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .header-title p {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--accent3);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 8px var(--accent3);
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+
+  .main {
+    padding: 24px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* Year Filter */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .year-pills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .year-pill {
+    padding: 6px 18px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    color: var(--muted);
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 1px;
+  }
+
+  .year-pill:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,212,255,0.2);
+  }
+
+  .year-pill.active {
+    background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,128,255,0.15));
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 16px rgba(0,212,255,0.3);
+  }
+
+  .year-pill.all-pill.active {
+    background: linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.1));
+    border-color: var(--accent2);
+    color: var(--accent2);
+    box-shadow: 0 0 16px rgba(245,158,11,0.3);
+  }
+
+  /* KPI Cards */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+
+  .kpi-card.blue::before { background: linear-gradient(90deg, var(--accent), #0080ff); }
+  .kpi-card.amber::before { background: linear-gradient(90deg, var(--accent2), #f97316); }
+  .kpi-card.green::before { background: linear-gradient(90deg, var(--accent3), #059669); }
+  .kpi-card.red::before { background: linear-gradient(90deg, var(--accent4), #dc2626); }
+  .kpi-card.purple::before { background: linear-gradient(90deg, #a855f7, #7c3aed); }
+
+  .kpi-icon { font-size: 28px; margin-bottom: 10px; }
+  .kpi-label {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    font-family: 'Oswald', sans-serif;
+  }
+
+  .kpi-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 26px;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .kpi-card.blue .kpi-value { color: var(--accent); }
+  .kpi-card.amber .kpi-value { color: var(--accent2); }
+  .kpi-card.green .kpi-value { color: var(--accent3); }
+  .kpi-card.red .kpi-value { color: var(--accent4); }
+  .kpi-card.purple .kpi-value { color: #a855f7; }
+
+  .kpi-unit {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  /* Content area: chart + table */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel2);
+  }
+
+  .panel-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  /* Chart */
+  .chart-wrap {
+    padding: 20px;
+    overflow-x: auto;
+  }
+
+  canvas {
+    max-width: 100%;
+  }
+
+  /* Table */
+  .table-wrap {
+    overflow-x: auto;
+    max-height: 520px;
+    overflow-y: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    background: var(--panel2);
+    color: var(--accent);
+    font-family: 'Oswald', sans-serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 10px 14px;
+    text-align: right;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+  }
+
+  thead th:first-child { text-align: left; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(30,58,95,0.4);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(0,212,255,0.04); }
+
+  tbody td {
+    padding: 9px 14px;
+    text-align: right;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  tbody td:first-child {
+    text-align: left;
+    font-family: 'Sarabun', sans-serif;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .badge-good { color: var(--accent3); }
+  .badge-warn { color: var(--accent2); }
+  .badge-bad { color: var(--accent4); }
+
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: var(--panel); }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Loading overlay */
+  #loading {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    gap: 20px;
+  }
+
+  .spinner {
+    width: 60px; height: 60px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    box-shadow: 0 0 20px rgba(0,212,255,0.3);
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #loading p {
+    font-family: 'Oswald', sans-serif;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    font-size: 13px;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  @media (max-width: 900px) {
+    .two-col { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+    header { padding: 12px 16px; }
+  }
+
+  /* Summary row in table */
+  .summary-row td {
+    background: rgba(0,212,255,0.07);
+    color: var(--accent) !important;
+    font-weight: 600;
+    border-top: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+  }
+
+  .chart-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  .chart-tab {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .chart-tab.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.1);
+  }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <p>กำลังโหลดข้อมูล...</p>
+</div>
+
+<header>
+  <div class="logo-area">
+    <div class="logo-icon">⚡</div>
+    <div class="header-title">
+      <h1>ITH Electricity Dashboard</h1>
+      <p>OPERATION DATA · POWER & PRODUCTION MONITORING</p>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="status-dot"></div>
+    <span style="font-size:12px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">LIVE DATA</span>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- Year Filter -->
+  <div class="filter-bar">
+    <span class="filter-label">🔍 กรองปี :</span>
+    <div class="year-pills" id="yearPills"></div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid" id="kpiGrid">
+    <div class="kpi-card blue">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Actual Electricity</div>
+      <div class="kpi-value" id="kpi-actual-elec">—</div>
+      <div class="kpi-unit">kWh (รวม)</div>
+    </div>
+    <div class="kpi-card amber">
+      <div class="kpi-icon">📋</div>
+      <div class="kpi-label">Plan Electricity</div>
+      <div class="kpi-value" id="kpi-plan-elec">—</div>
+      <div class="kpi-unit">kWh (รวม)</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon">🏭</div>
+      <div class="kpi-label">Actual Production</div>
+      <div class="kpi-value" id="kpi-actual-prod">—</div>
+      <div class="kpi-unit">BCM (รวม)</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon">🕐</div>
+      <div class="kpi-label">Working Hours</div>
+      <div class="kpi-value" id="kpi-hours">—</div>
+      <div class="kpi-unit">ชั่วโมง (รวม)</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-icon">⚙️</div>
+      <div class="kpi-label">Avg Productivity</div>
+      <div class="kpi-value" id="kpi-productivity">—</div>
+      <div class="kpi-unit">BCM / Hr.</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">Avg Actual Consumption</div>
+      <div class="kpi-value" id="kpi-consumption">—</div>
+      <div class="kpi-unit">kWh/BCM</div>
+    </div>
+  </div>
+
+  <!-- Charts -->
+  <div class="two-col" style="margin-bottom:20px;">
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">⚡ Electricity: Actual vs Plan</span>
+        <div class="chart-tabs">
+          <button class="chart-tab active" onclick="switchChart('elec','monthly')">รายเดือน</button>
+          <button class="chart-tab" onclick="switchChart('elec','yearly')">รายปี</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartElec" height="220"></canvas>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">🏭 Production vs Productivity</span>
+        <div class="chart-tabs">
+          <button class="chart-tab active" onclick="switchChart('prod','monthly')">รายเดือน</button>
+          <button class="chart-tab" onclick="switchChart('prod','yearly')">รายปี</button>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="chartProd" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Detail Table -->
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">📋 ข้อมูลรายละเอียด</span>
+      <span style="font-size:12px;color:var(--muted);font-family:'Share Tech Mono'" id="rowCount"></span>
+    </div>
+    <div class="table-wrap scrollbar-thin" id="tableWrap">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>เดือน</th>
+            <th>Actual Elec (kWh)</th>
+            <th>Plan Elec (kWh)</th>
+            <th>Actual Prod (BCM)</th>
+            <th>Plan Prod (BCM)</th>
+            <th>Working Hr.</th>
+            <th>Actual Consump (kWh/BCM)</th>
+            <th>Plan Consump (kWh/BCM)</th>
+            <th>Productivity (BCM/Hr.)</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ==================== DATA LOADING ====================
+const SHEET_ID = '17ztkMmCj-pO9UbdYwr_THZazD4GZmx-lgqHvs_ou1fA';
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=OPERATION%20DATA`;
+
+let allData = [];
+let selectedYear = 'ALL';
+let chartElecMode = 'monthly';
+let chartProdMode = 'monthly';
+let chartElecInst = null;
+let chartProdInst = null;
+
+const THAI_MONTHS = {
+  'มกราคม': 1, 'กุมภาพันธ์': 2, 'มีนาคม': 3, 'เมษายน': 4,
+  'พฤษภาคม': 5, 'มิถุนายน': 6, 'กรกฎาคม': 7, 'สิงหาคม': 8,
+  'กันยายน': 9, 'ตุลาคม': 10, 'พฤศจิกายน': 11, 'ธันวาคม': 12
+};
+
+const MONTH_SHORT = ['','ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+function parseNum(s) {
+  if (!s) return 0;
+  const n = parseFloat(s.toString().replace(/,/g, '').replace(/"/g,''));
+  return isNaN(n) ? 0 : n;
+}
+
+function parseMonthYear(str) {
+  str = str.trim().replace(/"/g,'');
+  for (const [name, num] of Object.entries(THAI_MONTHS)) {
+    if (str.includes(name)) {
+      const yearMatch = str.match(/\d{4}/);
+      if (yearMatch) {
+        return { month: num, year: parseInt(yearMatch[0]), label: str };
+      }
+    }
+  }
+  return null;
+}
+
+async function loadData() {
+  try {
+    const resp = await fetch(CSV_URL);
+    const text = await resp.text();
+    const lines = text.trim().split('\n');
+    // Skip header row (row 0)
+    for (let i = 1; i < lines.length; i++) {
+      const cols = parseCSVLine(lines[i]);
+      if (!cols || cols.length < 8) continue;
+      const parsed = parseMonthYear(cols[0]);
+      if (!parsed) continue;
+      const actualElec = parseNum(cols[1]);
+      const planElec = parseNum(cols[2]);
+      const actualProd = parseNum(cols[3]);
+      const planProd = parseNum(cols[4]);
+      const workHr = parseNum(cols[5]);
+      const actualConsump = parseNum(cols[6]);
+      const planConsump = parseNum(cols[7]);
+      const productivity = workHr > 0 ? actualProd / workHr : 0;
+      allData.push({
+        ...parsed,
+        actualElec, planElec, actualProd, planProd,
+        workHr, actualConsump, planConsump, productivity
+      });
+    }
+    allData.sort((a, b) => a.year !== b.year ? a.year - b.year : a.month - b.month);
+    buildUI();
+    document.getElementById('loading').style.display = 'none';
+  } catch (e) {
+    document.getElementById('loading').innerHTML = `<p style="color:var(--accent4)">⚠️ ไม่สามารถโหลดข้อมูลได้ กรุณาตรวจสอบการเข้าถึง Google Sheet</p>`;
+    console.error(e);
+  }
+}
+
+function parseCSVLine(line) {
+  const result = [];
+  let inQuote = false, cur = '';
+  for (let c of line) {
+    if (c === '"') { inQuote = !inQuote; }
+    else if (c === ',' && !inQuote) { result.push(cur.trim()); cur = ''; }
+    else { cur += c; }
+  }
+  result.push(cur.trim());
+  return result;
+}
+
+function buildUI() {
+  buildYearPills();
+  updateAll();
+}
+
+function buildYearPills() {
+  const years = [...new Set(allData.map(d => d.year))].sort();
+  const container = document.getElementById('yearPills');
+  container.innerHTML = '';
+
+  const allBtn = document.createElement('button');
+  allBtn.className = 'year-pill all-pill active';
+  allBtn.textContent = 'ทั้งหมด';
+  allBtn.onclick = () => selectYear('ALL');
+  container.appendChild(allBtn);
+
+  years.forEach(y => {
+    const btn = document.createElement('button');
+    btn.className = 'year-pill';
+    btn.textContent = y;
+    btn.onclick = () => selectYear(y);
+    container.appendChild(btn);
+  });
+}
+
+function selectYear(y) {
+  selectedYear = y;
+  document.querySelectorAll('.year-pill').forEach(b => b.classList.remove('active'));
+  const allPill = document.querySelector('.all-pill');
+  if (y === 'ALL') {
+    allPill.classList.add('active');
+  } else {
+    document.querySelectorAll('.year-pill:not(.all-pill)').forEach(b => {
+      if (b.textContent == y) b.classList.add('active');
+    });
+  }
+  updateAll();
+}
+
+function getFiltered() {
+  if (selectedYear === 'ALL') return allData;
+  return allData.filter(d => d.year === selectedYear);
+}
+
+function fmt(n, dec=0) {
+  if (n === 0) return '0';
+  return n.toLocaleString('th-TH', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function updateKPIs(data) {
+  const totalAE = data.reduce((s,d) => s+d.actualElec, 0);
+  const totalPE = data.reduce((s,d) => s+d.planElec, 0);
+  const totalAP = data.reduce((s,d) => s+d.actualProd, 0);
+  const totalHr = data.reduce((s,d) => s+d.workHr, 0);
+  const avgConsump = data.filter(d=>d.actualConsump>0).reduce((s,d,_,arr) => s+d.actualConsump/arr.length, 0);
+  const productivity = totalHr > 0 ? totalAP / totalHr : 0;
+
+  document.getElementById('kpi-actual-elec').textContent = fmt(totalAE/1e6, 2) + 'M';
+  document.getElementById('kpi-plan-elec').textContent = fmt(totalPE/1e6, 2) + 'M';
+  document.getElementById('kpi-actual-prod').textContent = fmt(totalAP/1e6, 3) + 'M';
+  document.getElementById('kpi-hours').textContent = fmt(totalHr);
+  document.getElementById('kpi-productivity').textContent = fmt(productivity, 3);
+  document.getElementById('kpi-consumption').textContent = fmt(avgConsump, 3);
+}
+
+function switchChart(type, mode) {
+  if (type === 'elec') {
+    chartElecMode = mode;
+    document.querySelectorAll('[onclick*="switchChart(\'elec\'"]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
+    });
+  } else {
+    chartProdMode = mode;
+    document.querySelectorAll('[onclick*="switchChart(\'prod\'"]').forEach(b => {
+      b.classList.toggle('active', b.getAttribute('onclick').includes(`'${mode}'`));
+    });
+  }
+  updateCharts(getFiltered());
+}
+
+function groupByYear(data, field) {
+  const map = {};
+  data.forEach(d => {
+    if (!map[d.year]) map[d.year] = 0;
+    map[d.year] += d[field];
+  });
+  return map;
+}
+
+function updateCharts(data) {
+  // ELECTRICITY CHART
+  let elecLabels, elecActual, elecPlan;
+  if (chartElecMode === 'monthly' || selectedYear !== 'ALL') {
+    elecLabels = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
+    elecActual = data.map(d => d.actualElec);
+    elecPlan = data.map(d => d.planElec);
+  } else {
+    const years = [...new Set(data.map(d => d.year))].sort();
+    elecLabels = years.map(String);
+    elecActual = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.actualElec, 0));
+    elecPlan = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.planElec, 0));
+  }
+
+  if (chartElecInst) chartElecInst.destroy();
+  chartElecInst = new Chart(document.getElementById('chartElec'), {
+    type: 'bar',
+    data: {
+      labels: elecLabels,
+      datasets: [
+        { label: 'Actual (kWh)', data: elecActual, backgroundColor: 'rgba(0,212,255,0.6)', borderColor: 'rgba(0,212,255,1)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Plan (kWh)', data: elecPlan, backgroundColor: 'rgba(245,158,11,0.4)', borderColor: 'rgba(245,158,11,0.8)', borderWidth: 1, type: 'line', tension: 0.4, fill: false, pointRadius: 2 }
+      ]
+    },
+    options: chartOptions('kWh')
+  });
+
+  // PRODUCTION + PRODUCTIVITY CHART
+  let prodLabels, prodActual, prodivity;
+  if (chartProdMode === 'monthly' || selectedYear !== 'ALL') {
+    prodLabels = data.map(d => MONTH_SHORT[d.month] + (selectedYear === 'ALL' ? `'${String(d.year).slice(2)}` : ''));
+    prodActual = data.map(d => d.actualProd);
+    prodivity = data.map(d => d.productivity);
+  } else {
+    const years = [...new Set(data.map(d => d.year))].sort();
+    prodLabels = years.map(String);
+    prodActual = years.map(y => data.filter(d => d.year === y).reduce((s,d) => s+d.actualProd, 0));
+    prodivity = years.map(y => {
+      const yData = data.filter(d => d.year === y);
+      const totHr = yData.reduce((s,d) => s+d.workHr, 0);
+      const totProd = yData.reduce((s,d) => s+d.actualProd, 0);
+      return totHr > 0 ? totProd/totHr : 0;
+    });
+  }
+
+  if (chartProdInst) chartProdInst.destroy();
+  chartProdInst = new Chart(document.getElementById('chartProd'), {
+    type: 'bar',
+    data: {
+      labels: prodLabels,
+      datasets: [
+        { label: 'Actual Prod (BCM)', data: prodActual, backgroundColor: 'rgba(16,185,129,0.55)', borderColor: 'rgba(16,185,129,1)', borderWidth: 1, borderRadius: 3 },
+        { label: 'Productivity (BCM/Hr)', data: prodivity, type: 'line', yAxisID: 'y2', backgroundColor: 'rgba(168,85,247,0.3)', borderColor: 'rgba(168,85,247,0.9)', borderWidth: 2, tension: 0.4, fill: false, pointRadius: 3, pointBackgroundColor: '#a855f7' }
+      ]
+    },
+    options: chartOptionsDual('BCM', 'BCM/Hr')
+  });
+}
+
+function chartOptions(unit) {
+  return {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 }, boxWidth: 12 } },
+      tooltip: { backgroundColor: '#1a2235', titleColor: '#00d4ff', bodyColor: '#e2e8f0', borderColor: '#1e3a5f', borderWidth: 1 }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(30,58,95,0.4)' } },
+      y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(1)+'M' : v >= 1e3 ? (v/1e3).toFixed(0)+'K' : v }, grid: { color: 'rgba(30,58,95,0.4)' } }
+    }
+  };
+}
+
+function chartOptionsDual(unit1, unit2) {
+  return {
+    responsive: true,
+    plugins: {
+      legend: { labels: { color: '#94a3b8', font: { family: 'Sarabun', size: 11 }, boxWidth: 12 } },
+      tooltip: { backgroundColor: '#1a2235', titleColor: '#10b981', bodyColor: '#e2e8f0', borderColor: '#1e3a5f', borderWidth: 1 }
+    },
+    scales: {
+      x: { ticks: { color: '#64748b', font: { size: 10 }, maxRotation: 45 }, grid: { color: 'rgba(30,58,95,0.4)' } },
+      y: { ticks: { color: '#64748b', font: { size: 10 }, callback: v => v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v }, grid: { color: 'rgba(30,58,95,0.4)' } },
+      y2: { position: 'right', ticks: { color: '#a855f7', font: { size: 10 }, callback: v => v.toFixed(2) }, grid: { drawOnChartArea: false } }
+    }
+  };
+}
+
+function updateTable(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = '';
+
+  // Summary row first if showing all years
+  const totals = {
+    actualElec: data.reduce((s,d)=>s+d.actualElec,0),
+    planElec: data.reduce((s,d)=>s+d.planElec,0),
+    actualProd: data.reduce((s,d)=>s+d.actualProd,0),
+    planProd: data.reduce((s,d)=>s+d.planProd,0),
+    workHr: data.reduce((s,d)=>s+d.workHr,0),
+  };
+  totals.productivity = totals.workHr > 0 ? totals.actualProd / totals.workHr : 0;
+  const validConsump = data.filter(d=>d.actualConsump>0);
+  totals.actualConsump = validConsump.length > 0 ? validConsump.reduce((s,d)=>s+d.actualConsump,0)/validConsump.length : 0;
+  totals.planConsump = validConsump.length > 0 ? data.filter(d=>d.planConsump>0).reduce((s,d)=>s+d.planConsump,0)/data.filter(d=>d.planConsump>0).length : 0;
+
+  const sumRow = document.createElement('tr');
+  sumRow.className = 'summary-row';
+  sumRow.innerHTML = `
+    <td>📊 รวม / เฉลี่ย</td>
+    <td>${fmt(totals.actualElec)}</td>
+    <td>${fmt(totals.planElec)}</td>
+    <td>${fmt(totals.actualProd,3)}</td>
+    <td>${fmt(totals.planProd,3)}</td>
+    <td>${fmt(totals.workHr,1)}</td>
+    <td>${fmt(totals.actualConsump,3)}</td>
+    <td>${fmt(totals.planConsump,3)}</td>
+    <td>${fmt(totals.productivity,4)}</td>
+  `;
+  tbody.appendChild(sumRow);
+
+  data.forEach(d => {
+    const tr = document.createElement('tr');
+    const diffElec = d.actualElec - d.planElec;
+    const elecClass = diffElec > 0 ? 'badge-bad' : diffElec < 0 ? 'badge-good' : '';
+    tr.innerHTML = `
+      <td>${d.label}</td>
+      <td class="${elecClass}">${fmt(d.actualElec)}</td>
+      <td>${fmt(d.planElec)}</td>
+      <td>${fmt(d.actualProd,3)}</td>
+      <td>${fmt(d.planProd,3)}</td>
+      <td>${fmt(d.workHr,1)}</td>
+      <td>${fmt(d.actualConsump,3)}</td>
+      <td>${fmt(d.planConsump,3)}</td>
+      <td class="badge-good">${fmt(d.productivity,4)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('rowCount').textContent = `${data.length} รายการ`;
+}
+
+function updateAll() {
+  const data = getFiltered();
+  updateKPIs(data);
+  updateCharts(data);
+  updateTable(data);
+}
+
+loadData();
+</script>
+</body>
+</html>

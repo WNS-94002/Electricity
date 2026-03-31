@@ -960,6 +960,8 @@ function switchLineMetric(metric) {
   document.getElementById('lcLegendPlan').style.color   = isElec ? '#f59e0b' : 'rgba(16,185,129,0.6)';
   updateCharts(getFiltered());
 }
+
+function groupByYear(data, field) {
   const map = {};
   data.forEach(d => {
     if (!map[d.year]) map[d.year] = 0;

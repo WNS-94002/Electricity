@@ -319,11 +319,72 @@
   .badge-warn { color: var(--accent2); }
   .badge-bad { color: var(--accent4); }
 
+  .page-tabs {
+    display: flex;
+    gap: 4px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 6px;
+    padding: 4px;
+  }
+  .page-tab {
+    padding: 7px 20px;
+    border-radius: 4px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Oswald', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    transition: all 0.2s;
+  }
+  .page-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .page-tab.active { background: rgba(0,212,255,0.15); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* CAL POWER styles */
+  .calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 24px; }
+  .calc-section { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .calc-section-header { padding: 12px 18px; background: var(--panel2); border-bottom: 1px solid var(--border); font-family: 'Oswald', sans-serif; font-size: 12px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .calc-row { display: flex; align-items: center; justify-content: space-between; padding: 9px 18px; border-bottom: 1px solid rgba(30,58,95,0.3); gap: 12px; }
+  .calc-row:last-child { border-bottom: none; }
+  .calc-label { font-size: 12px; color: var(--muted); flex: 1; line-height: 1.4; }
+  .calc-label span { font-size: 10px; color: #475569; display: block; }
+  .calc-value { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--text); text-align: right; min-width: 90px; }
+  .calc-unit { font-size: 10px; color: var(--muted); min-width: 55px; text-align: right; }
+  .calc-input-wrap { display: flex; align-items: center; gap: 8px; }
+  .calc-input { font-family: 'Share Tech Mono', monospace; font-size: 14px; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.35); border-radius: 5px; color: var(--accent); padding: 5px 10px; width: 100px; text-align: right; outline: none; transition: border 0.2s; }
+  .calc-input:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(0,212,255,0.2); }
+  .calc-input.input-yellow { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.5); color: var(--accent2); }
+  .calc-input.input-yellow:focus { border-color: var(--accent2); box-shadow: 0 0 10px rgba(245,158,11,0.2); }
+  .calc-result { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent3); text-align: right; min-width: 100px; background: rgba(16,185,129,0.06); border-radius: 4px; padding: 4px 8px; }
+  .calc-result.negative { color: var(--accent4); background: rgba(239,68,68,0.06); }
+  .calc-result.highlight { font-size: 18px; color: var(--accent); background: rgba(0,212,255,0.1); border: 1px solid rgba(0,212,255,0.2); }
+  .conveyor-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+  .conveyor-btn { padding: 6px 16px; border-radius: 4px; border: 1px solid var(--border); background: var(--panel); color: var(--muted); font-family: 'Oswald', sans-serif; font-size: 12px; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; }
+  .conveyor-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .conveyor-btn.active { background: rgba(0,212,255,0.15); border-color: var(--accent); color: var(--accent); }
+  .power-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px; }
+  .power-card { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 16px; position: relative; overflow: hidden; }
+  .power-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .power-card.cyan::before { background: linear-gradient(90deg, var(--accent), #0080ff); }
+  .power-card.green::before { background: linear-gradient(90deg, var(--accent3), #059669); }
+  .power-card.amber::before { background: linear-gradient(90deg, var(--accent2), #f97316); }
+  .power-card.red::before { background: linear-gradient(90deg, var(--accent4), #dc2626); }
+  .power-card.purple::before { background: linear-gradient(90deg, #a855f7, #7c3aed); }
+  .power-card-label { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; font-family: 'Oswald', sans-serif; text-transform: uppercase; margin-bottom: 6px; }
+  .power-card-value { font-family: 'Share Tech Mono', monospace; font-size: 24px; }
+  .power-card.cyan .power-card-value { color: var(--accent); }
+  .power-card.green .power-card-value { color: var(--accent3); }
+  .power-card.amber .power-card-value { color: var(--accent2); }
+  .power-card.red .power-card-value { color: var(--accent4); }
+  .power-card.purple .power-card-value { color: #a855f7; }
+  .power-card-unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
   .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: var(--panel); }
   .scrollbar-thin::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
-  /* Loading overlay */
   #loading {
     position: fixed; inset: 0;
     background: var(--bg);
@@ -416,12 +477,17 @@
     </div>
   </div>
   <div class="header-right">
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="switchPage('dashboard')">📊 Dashboard</button>
+      <button class="page-tab" onclick="switchPage('calpower')">⚙️ Cal. Power</button>
+    </div>
     <div class="status-dot"></div>
     <span style="font-size:12px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">LIVE DATA</span>
   </div>
 </header>
 
 <div class="main">
+<div id="page-dashboard" class="page active">
 
   <!-- Year Filter -->
   <div class="filter-bar">
@@ -654,7 +720,222 @@
     </div>
   </div>
 
-</div>
+</div><!-- end page-dashboard -->
+
+<!-- ==================== CAL. POWER PAGE ==================== -->
+<div id="page-calpower" class="page">
+  <div style="padding:0 0 24px;">
+
+    <!-- Title -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px;">
+      <div style="width:4px;height:32px;background:linear-gradient(180deg,var(--accent),#0080ff);border-radius:2px;"></div>
+      <div>
+        <div style="font-family:'Oswald',sans-serif;font-size:20px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;">Conveyor Belt Driving Power Calculations</div>
+        <div style="font-size:12px;color:var(--muted);letter-spacing:1px;margin-top:2px;">เลือก Conveyor แล้วกรอกค่า Elevation และ Horizontal Length</div>
+      </div>
+    </div>
+
+    <!-- Conveyor Selector -->
+    <div style="margin-bottom:20px;">
+      <div style="font-family:'Oswald',sans-serif;font-size:11px;color:var(--muted);letter-spacing:2px;margin-bottom:10px;">SELECT CONVEYOR</div>
+      <div class="conveyor-selector" id="conveyorBtns"></div>
+    </div>
+
+    <!-- Power Summary Cards -->
+    <div class="power-summary" id="powerSummary">
+      <div class="power-card cyan">
+        <div class="power-card-label">Total Power (P)</div>
+        <div class="power-card-value" id="pc-total">—</div>
+        <div class="power-card-unit">kW</div>
+      </div>
+      <div class="power-card green">
+        <div class="power-card-label">P1 · No-load Axle</div>
+        <div class="power-card-value" id="pc-p1">—</div>
+        <div class="power-card-unit">kW</div>
+      </div>
+      <div class="power-card amber">
+        <div class="power-card-label">P2 · Axle Under Load</div>
+        <div class="power-card-value" id="pc-p2">—</div>
+        <div class="power-card-unit">kW</div>
+      </div>
+      <div class="power-card red">
+        <div class="power-card-label">P3 · Vertical Axle</div>
+        <div class="power-card-value" id="pc-p3">—</div>
+        <div class="power-card-unit">kW</div>
+      </div>
+      <div class="power-card purple">
+        <div class="power-card-label">Pt · Tripper/Stacker</div>
+        <div class="power-card-value" id="pc-pt">—</div>
+        <div class="power-card-unit">kW</div>
+      </div>
+      <div class="power-card cyan" style="--accent:#a855f7;">
+        <div class="power-card-label">Drive 1500kW needed</div>
+        <div class="power-card-value" id="pc-drives" style="color:#a855f7;">—</div>
+        <div class="power-card-unit">units</div>
+      </div>
+    </div>
+
+    <!-- Two columns: Inputs + Fixed Params -->
+    <div class="two-col" style="margin-bottom:20px;">
+
+      <!-- USER INPUTS -->
+      <div class="calc-section">
+        <div class="calc-section-header" style="color:#f59e0b;">✏️ User Inputs — กรอกค่าที่นี่</div>
+        <div class="calc-row">
+          <div class="calc-label">Head End Elevation<span>MSL</span></div>
+          <div class="calc-input-wrap">
+            <input class="calc-input input-yellow" id="in-head" type="number" step="0.1" value="0" oninput="calcPower()">
+            <div class="calc-unit">MSL</div>
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Tail End Elevation<span>MSL</span></div>
+          <div class="calc-input-wrap">
+            <input class="calc-input input-yellow" id="in-tail" type="number" step="0.1" value="0" oninput="calcPower()">
+            <div class="calc-unit">MSL</div>
+          </div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">I · Horizontal Length of Conveyor<span>m</span></div>
+          <div class="calc-input-wrap">
+            <input class="calc-input input-yellow" id="in-horiz" type="number" step="1" value="0" oninput="calcPower()">
+            <div class="calc-unit">m</div>
+          </div>
+        </div>
+        <div class="calc-row" style="background:rgba(0,212,255,0.03);">
+          <div class="calc-label">H (Overall Lift) <span>= Head − Tail + Height of Pulley</span></div>
+          <div class="calc-result" id="res-H">—</div>
+          <div class="calc-unit">m</div>
+        </div>
+        <div class="calc-row" style="background:rgba(0,212,255,0.03);">
+          <div class="calc-label">Height of Head End Pulley<span>IF(I > 0.4, 5, 0)</span></div>
+          <div class="calc-result" id="res-pulley">—</div>
+          <div class="calc-unit">m</div>
+        </div>
+        <div class="calc-row" style="background:rgba(0,212,255,0.03);">
+          <div class="calc-label">lo · Adjusted Horiz. Length<span>IF(I > 60, I, 60)</span></div>
+          <div class="calc-result" id="res-lo">—</div>
+          <div class="calc-unit">m</div>
+        </div>
+      </div>
+
+      <!-- FIXED PARAMETERS -->
+      <div class="calc-section">
+        <div class="calc-section-header">⚙️ Fixed Parameters</div>
+        <div class="calc-row">
+          <div class="calc-label">Material Type</div>
+          <div class="calc-value" id="fp-material">CLAY</div>
+          <div class="calc-unit"></div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Bulk Density</div>
+          <div class="calc-value" id="fp-density">1.46</div>
+          <div class="calc-unit">Ton/LCM</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Belt Width</div>
+          <div class="calc-value" id="fp-beltwidth">2200</div>
+          <div class="calc-unit">mm</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Cross Section Area</div>
+          <div class="calc-value" id="fp-csa">0.648</div>
+          <div class="calc-unit">m²</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Coefficient by Angle of Incline</div>
+          <div class="calc-value" id="fp-coeff">0.98</div>
+          <div class="calc-unit"></div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Belt Speed (v)</div>
+          <div class="calc-value" id="fp-speed">360</div>
+          <div class="calc-unit">m/min</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Friction of Idler Bearings (f)</div>
+          <div class="calc-value">0.023</div>
+          <div class="calc-unit"></div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Weight of Belt (w)</div>
+          <div class="calc-value" id="fp-w">134.00</div>
+          <div class="calc-unit">kg/m</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Weight Carrier Rollers (Wc)</div>
+          <div class="calc-value" id="fp-wc">60.00</div>
+          <div class="calc-unit">kg</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Weight Return Rollers (Wr)</div>
+          <div class="calc-value" id="fp-wr">50.00</div>
+          <div class="calc-unit">kg</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Pitch Carrier Roller (lc)</div>
+          <div class="calc-value" id="fp-lc">1.50</div>
+          <div class="calc-unit">m</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Pitch Return Roller (lr)</div>
+          <div class="calc-value" id="fp-lr">6.00</div>
+          <div class="calc-unit">m</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Qt · Transport Capacity<span>= C7×v×CSA×density×coeff×60</span></div>
+          <div class="calc-result" id="res-Qt">—</div>
+          <div class="calc-unit">Ton/hr</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">W · Moving Parts<span>= Wc/lc + Wr/lr + 2×w</span></div>
+          <div class="calc-result" id="res-W">—</div>
+          <div class="calc-unit">kg/m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Power Calculations Detail -->
+    <div class="calc-section" style="margin-bottom:20px;">
+      <div class="calc-section-header" style="color:var(--accent3);">🔢 Power Calculation Detail</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:0;">
+        <div class="calc-row">
+          <div class="calc-label">P1 · Horizontal No-load Axle Power<span>= f×(H+lo)×W×v/6120</span></div>
+          <div class="calc-result" id="res-P1">—</div>
+          <div class="calc-unit">kW</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">P2 · Horizontal Axle Power Under Load<span>= f×(H+lo)×W×v/6120</span></div>
+          <div class="calc-result" id="res-P2">—</div>
+          <div class="calc-unit">kW</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">P3 · Vertical Axle Power Underload<span>= H×Qt/367</span></div>
+          <div class="calc-result" id="res-P3">—</div>
+          <div class="calc-unit">kW</div>
+        </div>
+        <div class="calc-row">
+          <div class="calc-label">Pt · Driving Power of Tripper/Stacker</div>
+          <div class="calc-result" id="res-Pt">—</div>
+          <div class="calc-unit">kW</div>
+        </div>
+        <div class="calc-row" style="background:rgba(0,212,255,0.04);">
+          <div class="calc-label" style="font-weight:600;color:var(--text);">P · Calculated Axle Power of Drive Pulley<span>= P1 + P2 + P3 + Pt</span></div>
+          <div class="calc-result highlight" id="res-P">—</div>
+          <div class="calc-unit">kW</div>
+        </div>
+        <div class="calc-row" style="background:rgba(168,85,247,0.04);">
+          <div class="calc-label" style="color:#a855f7;">Number of Drive 1500 kW<span>= ROUNDUP(P/1500, 0)</span></div>
+          <div class="calc-result" id="res-drives" style="color:#a855f7;background:rgba(168,85,247,0.1);">—</div>
+          <div class="calc-unit">units</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div><!-- end page-calpower -->
+
+</div><!-- end .main -->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
@@ -1470,6 +1751,144 @@ function updateYearlySection(data) {
 }
 
 loadData();
+
+// ==================== PAGE NAVIGATION ====================
+function switchPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.page-tab').forEach(b => {
+    if (b.getAttribute('onclick').includes(`'${page}'`)) b.classList.add('active');
+  });
+}
+
+// ==================== CAL. POWER ====================
+const CONVEYORS = [
+  { name:'S1',  beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:7.4  },
+  { name:'S2C', beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S2B', beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S2A', beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S2',  beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S3',  beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S4',  beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'S5',  beltWidth:2200, csa:0.648, coeff:0.98, density:1.46, speed:360, w:134.00, wc:60.00, wr:50.00, lc:1.50, lr:6.00, pt:0    },
+  { name:'C1',  beltWidth:1800, csa:0.414, coeff:0.98, density:1.46, speed:360, w: 93.30, wc:47.40, wr:42.50, lc:1.50, lr:6.00, pt:0    },
+  { name:'C2',  beltWidth:1800, csa:0.414, coeff:0.98, density:1.46, speed:360, w: 93.30, wc:47.40, wr:42.50, lc:1.50, lr:6.00, pt:0    },
+  { name:'B1',  beltWidth:1800, csa:0.414, coeff:0.98, density:1.46, speed:360, w: 93.30, wc:47.40, wr:42.50, lc:1.50, lr:6.00, pt:0    },
+  { name:'B2',  beltWidth:1800, csa:0.414, coeff:0.98, density:1.46, speed:360, w: 93.30, wc:47.40, wr:42.50, lc:1.50, lr:6.00, pt:0    },
+  { name:'B3',  beltWidth:1800, csa:0.414, coeff:0.98, density:1.46, speed:360, w: 93.30, wc:47.40, wr:42.50, lc:1.50, lr:6.00, pt:0    },
+];
+
+let selectedConveyor = CONVEYORS[0];
+
+function initCalPower() {
+  const container = document.getElementById('conveyorBtns');
+  CONVEYORS.forEach((cv, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'conveyor-btn' + (i===0?' active':'');
+    btn.textContent = cv.name;
+    btn.onclick = () => selectConveyor(i);
+    container.appendChild(btn);
+  });
+  updateFixedParams();
+  calcPower();
+}
+
+function selectConveyor(idx) {
+  selectedConveyor = CONVEYORS[idx];
+  document.querySelectorAll('.conveyor-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+  updateFixedParams();
+  calcPower();
+}
+
+function updateFixedParams() {
+  const cv = selectedConveyor;
+  document.getElementById('fp-material').textContent   = 'CLAY';
+  document.getElementById('fp-density').textContent    = cv.density.toFixed(2);
+  document.getElementById('fp-beltwidth').textContent  = cv.beltWidth;
+  document.getElementById('fp-csa').textContent        = cv.csa.toFixed(3);
+  document.getElementById('fp-coeff').textContent      = cv.coeff.toFixed(2);
+  document.getElementById('fp-speed').textContent      = cv.speed;
+  document.getElementById('fp-w').textContent          = cv.w.toFixed(2);
+  document.getElementById('fp-wc').textContent         = cv.wc.toFixed(2);
+  document.getElementById('fp-wr').textContent         = cv.wr.toFixed(2);
+  document.getElementById('fp-lc').textContent         = cv.lc.toFixed(2);
+  document.getElementById('fp-lr').textContent         = cv.lr.toFixed(2);
+}
+
+function fmtN(n, d=3) {
+  if (isNaN(n) || !isFinite(n)) return '—';
+  return n.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d });
+}
+
+function setResult(id, val, d=3) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = fmtN(val, d);
+  el.classList.toggle('negative', val < 0);
+}
+
+function calcPower() {
+  const cv    = selectedConveyor;
+  const head  = parseFloat(document.getElementById('in-head').value)  || 0;
+  const tail  = parseFloat(document.getElementById('in-tail').value)  || 0;
+  const I     = parseFloat(document.getElementById('in-horiz').value) || 0;
+
+  // Row 11: Height of Head End Pulley
+  const pulley = I > 0.4 ? 5 : 0;
+
+  // Row 13: H Overall Lift
+  const H = head - tail + pulley;
+
+  // Row 15: lo Adjusted horizontal length
+  const lo = I > 60 ? I : 60;
+
+  // Row 12: Qt Transport capacity
+  // Qt = (beltWidth/1000) * speed * CSA * density * coeff * 60
+  const Qt = (cv.beltWidth / 1000) * cv.speed * cv.csa * cv.density * cv.coeff * 60;
+
+  // Row 23: W Weight of moving parts
+  const W = cv.wc / cv.lc + cv.wr / cv.lr + 2 * cv.w;
+
+  // Row 24: P1 Horizontal no-load axle power
+  const P1 = cv.density > 0 ? 0.023 * (H + lo) * W * cv.speed / 6120 : 0;
+  // Row 25: P2 Horizontal axle power under load (same formula as P1 per sheet)
+  const P2 = 0.023 * (H + lo) * W * cv.speed / 6120;
+  // Row 26: P3 Vertical axle power underload
+  const P3 = H * Qt / 367;
+  // Row 27: Pt Driving power of tripper/stacker
+  const Pt = cv.pt;
+  // Row 28: P total
+  const P  = P1 + P2 + P3 + Pt;
+  // Row 29: Number of drives
+  const drives = Math.ceil(P / 1500);
+
+  // Update derived inputs
+  setResult('res-pulley', pulley, 1);
+  setResult('res-H',  H,  3);
+  setResult('res-lo', lo, 2);
+  setResult('res-Qt', Qt, 0);
+  setResult('res-W',  W,  2);
+
+  // Update power rows
+  setResult('res-P1', P1, 3);
+  setResult('res-P2', P2, 3);
+  setResult('res-P3', P3, 3);
+  setResult('res-Pt', Pt, 1);
+  setResult('res-P',  P,  2);
+  document.getElementById('res-drives').textContent = drives;
+  document.getElementById('res-drives').classList.toggle('negative', drives < 0);
+
+  // Summary cards
+  document.getElementById('pc-total').textContent  = fmtN(P, 2);
+  document.getElementById('pc-p1').textContent     = fmtN(P1, 3);
+  document.getElementById('pc-p2').textContent     = fmtN(P2, 3);
+  document.getElementById('pc-p3').textContent     = fmtN(P3, 3);
+  document.getElementById('pc-pt').textContent     = fmtN(Pt, 1);
+  document.getElementById('pc-drives').textContent = drives;
+}
+
+initCalPower();
 </script>
 </body>
 </html>

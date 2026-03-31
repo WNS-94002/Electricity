@@ -504,6 +504,11 @@
               <div id="donut-diff" style="font-family:'Share Tech Mono',monospace;font-size:18px;"></div>
               <div style="font-size:10px;color:var(--muted);">BCM</div>
             </div>
+            <div style="border-top:1px solid var(--border);padding-top:10px;">
+              <div style="font-size:10px;color:var(--muted);font-family:'Oswald',sans-serif;letter-spacing:1px;">WORKING HOURS</div>
+              <div id="donut-workhrs" style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#a855f7;"></div>
+              <div style="font-size:10px;color:var(--muted);">ชั่วโมง</div>
+            </div>
           </div>
         </div>
       </div>
@@ -1393,17 +1398,19 @@ function updateYearlySection(data) {
   // Production donut
   const totalAP  = data.reduce((s,d)=>s+d.actualProd,0);
   const totalPP  = data.reduce((s,d)=>s+d.planProd,0);
+  const totalWH  = data.reduce((s,d)=>s+d.workHr,0);
   const diff     = totalAP - totalPP;
   const achPct   = totalPP > 0 ? (totalAP/totalPP*100) : 0;
   const rem      = Math.max(0, totalPP - totalAP);
   const over     = Math.max(0, totalAP - totalPP);
 
-  document.getElementById('donut-actual').textContent = fmt(totalAP,3);
-  document.getElementById('donut-plan').textContent   = fmt(totalPP,3);
-  document.getElementById('donut-diff').textContent   = (diff>=0?'+':'')+fmt(diff,3);
-  document.getElementById('donut-diff').style.color   = diff>=0 ? '#10b981' : '#ef4444';
-  document.getElementById('donut-pct').textContent    = achPct.toFixed(1)+'%';
-  document.getElementById('donut-pct').style.color    = achPct>=100 ? '#10b981' : '#f59e0b';
+  document.getElementById('donut-actual').textContent  = fmt(totalAP,3);
+  document.getElementById('donut-plan').textContent    = fmt(totalPP,3);
+  document.getElementById('donut-diff').textContent    = (diff>=0?'+':'')+fmt(diff,3);
+  document.getElementById('donut-diff').style.color    = diff>=0 ? '#10b981' : '#ef4444';
+  document.getElementById('donut-pct').textContent     = achPct.toFixed(1)+'%';
+  document.getElementById('donut-pct').style.color     = achPct>=100 ? '#10b981' : '#f59e0b';
+  document.getElementById('donut-workhrs').textContent = fmt(totalWH,1);
 
   if (chartProdDonutInst) chartProdDonutInst.destroy();
   chartProdDonutInst = new Chart(document.getElementById('chartProdDonut'), {
